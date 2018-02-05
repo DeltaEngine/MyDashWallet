@@ -1,0 +1,72 @@
+﻿@{
+	ViewData["Title"] = "Using the Ledger Hardware Wallet on MyDashWallet";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<article class="block block__content clearfix" itemscope="" itemtype="http://schema.org/Article">
+	<h1 class="page__title" itemprop="headline">Ledger Hardware Wallet Guide</h1>
+	<div class="content">
+		The Ledger Nano S is one of the best and easiest cryptocurrency hardware wallets out there, it is available for <a href="https://www.ledgerwallet.com/products/">purchase here</a>. It supports a wide range of cryptocurrencies, you can also check other guides (like <a href="https://myetherwallet.github.io/knowledge-base/migration/moving-from-private-key-to-ledger-hardware-wallet.html">this excellent one for Ethereum and its tokens using MyEtherWallet</a>, this guide is based on it).<br /><br />
+		<section class="align-items-center">
+			<h3>Initial set-up</h3>
+			<p><img src="https://myetherwallet.github.io/knowledge-base/images/ledger-migration/welcome.jpg" style="width: 100%; height: auto; max-width: 600px;"></p>
+			<p>Navigating on the Ledger Nano S works by pressing either of the two buttons at the top of the device. Press both buttons at the same time to begin the configuration of the device.</p>
+			<p><img src="https://myetherwallet.github.io/knowledge-base/images/ledger-migration/configure-as-new-device.jpg" style="width: 100%; height: auto; max-width: 600px;"></p>
+			<p>The first thing your Nano S will ask you is if you want to set it up as new device. We will press the right button to confirm the action, if you ever want to restore your Nano S (more on this below!), you will have to select the left button and it will start the restoration process by asking for your recovery words.</p>
+			<p><img src="https://myetherwallet.github.io/knowledge-base/images/ledger-migration/choose-pin.jpg" style="width: 100%; height: auto; max-width: 600px;"></p>
+			<p>The Nano S will then ask you to set up a pin. This is an important step, as you will have to enter it every time you want to access your Nano S. The minimum amount of numbers needed is 4, and the maximum is 8. You can always change this pin after you are done setting up your Nano S. After entering it will ask you to enter your pin once again, to confirm it is correct. It's worth stating that if you enter the wrong pin number 3 times in a row, it will automatically reset your Nano S.</p>
+			<p><img src="https://myetherwallet.github.io/knowledge-base/images/ledger-migration/write-down-recovery.jpg" style="width: 100%; height: auto; max-width: 600px;"></p>
+			<p>Next, the Nano S will give you 24 random words that you will have to write down on the provided card in the box. These are the recovery words, also known as seed, that you will have to use when you want to restore your Nano S in case it fails or you accidentally reset the Nano S. Once you've written down all of the words it will ask you to confirm your recovery phrase, in order to make sure that you've written them down correctly.</p>
+			<p><strong>Do not write down these recovery words on your computer, as it will be just as unsafe as using a normal private key. Always write it down physically using a pen, on a piece of paper only you have access to. Also do not take a photo of your piece of paper.</strong></p>
+			<p><img src="https://myetherwallet.github.io/knowledge-base/images/ledger-migration/device-ready.jpg" style="width: 100%; height: auto; max-width: 600px;"></p>
+			<p>Now your Ledger Nano S is all set-up and ready to be used!</p>
+		</section>
+		<br><br>
+		<section class="align-items-center">
+			<h3>Enabling your Ledger Nano S to work with MyDashWallet</h3>
+			<p>In order to make your Nano S work with MyDashWallet, we will need to enable browser support for the Dash app (<a href="https://ledger.zendesk.com/hc/en-us/articles/115005308185-How-to-install-and-use-Dash-DASH-with-Ledger">make sure to install it</a> first if you don't see it yet).</p>
+			<p><img src="https://myetherwallet.github.io/knowledge-base/images/ledger-migration/ethereum-app.jpg" style="width: 100%; height: auto; max-width: 600px;"></p>
+			<p>First of all, open up the Dash app by navigating to it, and pressing both buttons at the same time to open it. Then press the right button to select "Settings", after that press both buttons to open it up.</p>
+			<p><img src="https://myetherwallet.github.io/knowledge-base/images/ledger-migration/ethereum-settings.jpg" style="width: 100%; height: auto; max-width: 600px;"></p>
+			<p>Select "Browser Support", press both buttons at the same time to open it op, press the right button to select "Yes", then press both buttons again to confirm.</p>
+			<p><img src="https://myetherwallet.github.io/knowledge-base/images/ledger-migration/yes.jpg" style="width: 100%; height: auto; max-width: 600px;"></p>
+			<p>Now we are done configuring the Nano S to work with MyDashWallet. You can press the right button to select "Back" and press both buttons at the same time to go back to the Dash app. If you do this once again you will go back to the main menu with all the apps.</p>
+		</section>
+		<br><br>
+		<section class="align-items-center">
+			<h3>Using the Ledger Nano S with MyDashWallet</h3>
+			<p>It's time to access our Nano S using <a href="https://MyDashWallet.org">MyDashWallet.org</a>, make sure your Ledger is unlocked and in the Dash app with Browser Settings enabled. Now simply click the "Ledger Hardware Wallet" button and you are immediately in (easy, isn't it?).</p>
+			<p>Now you can see how much Dash you have in total on the top right, spend it or use one of the other features of MyDashWallet. Every action still needs to be confirmed on your hardware device.</p>
+			<p>Below your amount you will see a long list of different Dash addresses used yet (latest fresh one with QR code that can be scanned or copied to get more Dash to your hardware wallet). Over time this list can get bigger, each of the addresses can be clicked to check the status in detail. All of these addresses are safely stored on your Nano S, and they all belong to you can are used when you sending Dash automatically by the Ledger.</p>
+		</section>
+		<br><br>
+		<section class="align-items-center">
+			<h3 id="restoring-your-nano-s">Restoring your Nano S</h3>
+			<p>Ledger made a clear and easy to follow guide on how to restore your Nano S <a href="https://ledger.zendesk.com/hc/en-us/articles/115005165309-How-to-import-recover-a-backup-on-a-Nano-S.html">here</a>.</p>
+		</section>
+		<br><br>
+		<section class="align-items-center">
+			<h3 id="troubleshooting">Troubleshooting</h3>
+			<p>Ledger has an extensive knowledge base that you can find <a href="https://ledger.zendesk.com/">here</a>. There is a big chance that it's already listed on one of them. If not, feel free to contact either <a href="https://ledger.zendesk.com/hc/en-us/requests/new">Ledger</a> or <a href="mailto:Support@MyDashWallet.org">Support@MyDashWallet.org</a>.</p>
+		</section>
+		<br><br>
+		<section class="align-items-center">
+			<div class="col col-sm-7">
+				<h3>
+					Other help
+				</h3>
+				<ul>
+					<li>  <a href="/About">Back to general help</a>.  </li>
+					<li>  <a href="https://dashpay.atlassian.net/wiki/spaces/DOC/pages/90079240/Ledger">Official Dash guide on using the Ledger hardware wallet</a></li>
+					<li>  <a href="/AboutHardwareWallets">Get a hardware wallet</a>.  </li>
+					<li>  <a href="/AboutTrezorHardwareWallet">How to send via TREZOR hardware wallet</a>.  </li>
+					<li>  <a href="/AboutCreateNewWallet">How to create a new wallet</a>.  </li>
+				</ul>
+			</div>
+			<div class="col col-sm-4 offset-sm-1">
+				<img src="/images/onboarding_icon-10.svg" alt="">
+			</div>
+		</section>
+	</div>
+</article>

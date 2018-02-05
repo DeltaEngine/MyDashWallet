@@ -1,0 +1,288 @@
+﻿<script>
+	var usdRate = @ViewData["UsdRate"];
+	var eurRate = @ViewData["EurRate"];
+	var btcRate = @ViewData["BtcRate"];
+	var gbpRate = @ViewData["GbpRate"];
+	// Make sure we use trezors popup
+	window.TREZOR_POPUP_ORIGIN = 'https://connect.trezor.io';
+</script>
+<script src="~/ledger.js"></script>
+<script src="https://connect.trezor.io/4/connect.js"></script>
+<script src="~/dash.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+<script src="~/index.js"></script>
+<h1 id="title">Unlock Wallet</h1>
+<div id="response" style="display: none"></div>
+<main id="main-panel" class="tab-pane block--container active" ng-if="globalService.currentTab==globalService.tabs.generateWallet.id" ng-controller="walletGenCtrl" role="main">
+	<article class="block__wrap gen__1" ng-show="!wallet &amp;&amp; !showGetAddress">
+		<section class="block__main">
+			<div id="unlockKeystorePanel" style="display: none">
+				<b>Keystore Wallet</b> found in your browser. Please enter your password to unlock your wallet.<br />
+				<ul>
+					<li class="unlock-button">
+						<input type="password" id="keystorePasswordUnlock" class="form-control" placeholder="Password" />
+						<button class="btn btn-primary" id="unlockKeystoreButton" onclick="unlockKeystore()">Unlock Keystore wallet</button>
+					</li>
+					<li class="unlock-button">
+						You can also delete the Keystore found in your browser to start over (make sure you still have your local backup)<br />
+						<button class="btn btn-primary" id="deleteKeystoreButton" onclick="deleteKeystore()">Delete Keystore file</button>
+					</li>
+				</ul>
+				<br />
+			</div>
+			<a href="/AboutLedgerHardwareWallet">Ledger</a> or <a href="/AboutTrezorHardwareWallet">TREZOR</a> hardware wallets are the safest option! Requires <a href="https://en.wikipedia.org/wiki/Universal_2nd_Factor">U2F</a> compatible browser: Chrome, Opera, Firefox
+			<ul>
+				<li class="unlock-button">
+					<button onclick="unlockLedger(true)" class="btn btn-primary">Ledger Hardware Wallet</button>
+					<div id="autoConnectLedgerPanel">
+						<label style="margin: 0; font-weight: normal; font-size: medium;"><input type="checkbox" id="allowAutoConnectLedger" onclick="toggleAutoConnectLedger()" /> Auto-connect<span id="auto-connect-time" style="font-weight: 800"></span> if a Ledger is detected, unlocked and in Dash app.</label><img src="/images/ajax-loader.gif" style="float: right; display: none;" alt="waiting" id="autoConnectSpinner" />
+					</div>
+				</li>
+				<li class="unlock-button"><button onclick="unlockTrezor(true)" class="btn btn-primary">TREZOR Hardware Wallet</button></li>
+			</ul>
+			<br />
+			<div id="createLocalWalletPanel">
+				Create local wallet (dangerous, make sure your device is safe, no one is watching you, check the url). <b>Store only a reasonable amount for daily use</b>. Never give this to anyone, they can steal your funds. Will be password-protected.
+				<ul>
+					<li class="unlock-button"><button onclick="createKeystoreWallet()" class="btn btn-primary" id="createKeystoreButton">Create Keystore Wallet</button><br /></li>
+					<li class="unlock-button" id="createKeystoreOutput"><a asp-area="" asp-controller="Home" asp-action="AboutCreateNewWallet">Guide on creating your first Keystore Wallet</a></li>
+					<li class="unlock-button" id="createKeystorePasswordPanel" style="display:none">
+						<input type="password" id="keystorePassword" oninput="passwordChanged()" class="form-control" placeholder="Password" />
+						Please repeat the password.<br />
+						<input type="password" id="keystorePasswordRepeated" oninput="passwordChanged()" class="form-control" placeholder="Repeat Password" />
+						<span id="passwordResult">Please enter at least 8 characters, the password must contain different letters with numbers or symbols.</span>
+						<br />
+						<button disabled="disabled" class="btn btn-primary" id="generateKeystoreButton" onclick="generateKeystoreFile()">Download Keystore File</button>
+					</li>
+				</ul>
+				<br />
+			</div>
+			<script>
+				if (localStorage.getItem("keystore")) {
+					$("#createLocalWalletPanel").hide();
+					$("#unlockKeystorePanel").show();
+				} else if (!localStorage.getItem("addressBalances"))
+					// Hide auto-connect ledger panel if this is the first time visiting the site
+					$("#autoConnectLedgerPanel").hide();
+			</script>
+			Importing from backups (to recover funds or when using a different device)
+			<ul>
+				<li class="unlock-button"><button onclick="importKeystoreWallet()" class="btn btn-primary" id="importKeystoreButton">Import Keystore File</button></li>
+				<li class="unlock-button" id="importKeystorePanel" style="display: none">
+					Keystore file:
+					<input type='file' id="keystoreFile" accept=".KeyStore" />
+					<button class="btn btn-primary" id="loadKeystoreButton" onclick="loadKeystoreFile()" title="Loads the provided Keystore file into this browser instance to unlock and access it via your password">Load Keystore File</button>
+				</li>
+				<li class="unlock-button"><button onclick="importPrivateKey()" class="btn btn-primary" id="importPrivateKeyButton">Import Private Key</button></li>
+				<li class="unlock-button" id="privateKeyInputPanel" style="display:none">
+					<input type="password" id="privateKeyInput" class="form-control" placeholder="Private Key" />
+					<span id="createPrivateKeyNotes">
+						Please enter your private key to import it into a Keystore Wallet. Once created, secure it with a password!
+					</span><br />
+					<button onclick="importPrivateKeyToKeystore()" class="btn btn-primary">Create Keystore from Private Key</button>
+				</li>
+				@*<li class="unlock-button"><a asp-controller="Home" asp-action="Address">Check any wallet address in read-only mode</a></li>*@
+			</ul>
+			<br /><br />
+			Coming later (if you need this, help getting continued development being funded by <a href="https://www.dash.org/forum/threads/mydashwallet-with-tipping-and-hardware-wallet-support.20566/">posting in the Dash Forum</a>)
+			<ul>
+				<li class="unlock-button"><button class="btn btn-primary.disabled">Create HD Wallet</button><br /> (<a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki">BIP39/44</a>, multiple addresses, for daily use or exporting)</li>
+				<li class="unlock-button"><button class="btn btn-primary.disabled">Import HD Wallet</button><br /> (BIP39/44 recovery phrase <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki">HD wallets</a>, from Jaxx, Dash Electrum, Exodus, CoPay, Coinomi or hardware wallets)</li>
+				<li class="unlock-button"><button class="btn btn-primary.disabled">Import BIP32 Wallet</button><br /> (from <a href="https://play.google.com/store/apps/details?id=hashengineering.darkcoin.wallet">Dash Android</a>/<a href="https://itunes.apple.com/us/app/dash-wallet/id1206647026">iOS Wallet</a> recovery phrase) <a href="https://dashpay.atlassian.net/wiki/spaces/DOC/pages/112867673/How+to+restore+an+old+or+backed+up+wallet">Additional tips on backups and restoring wallets</a></li>
+			</ul>
+		</section>
+		<section class="block__help">
+			<h2>Important</h2>
+			<ul>
+				<li>
+					<p>
+						<strong>MyDashWallet.org is NOT an online wallet</strong>:
+						This site NEVER stores or uses your private keys or wallet. All funds are 100% under your control.
+					</p>
+				</li>
+				<li>
+					<p>
+						You can use this website offline, only for sending DASH you need to communicate with the blockchain!
+					</p>
+				</li>
+				<li>
+					<p>
+						Advanced features like <b>InstantSend</b> and <b>PrivateSend</b> are supported (unlike most other thin clients: Hardware, Mobile or any third party wallet).
+					</p>
+				</li>
+				<li>
+					<p>
+						<a href="https://github.com/DeltaEngine/MyDashWallet" target='_blank' rel='noopener noreferrer'>Open source</a>, non-profit and free to use.
+					</p>
+				</li>
+				<li>
+					<p>
+						Uses currently available Dash features, the upcoming <a href="https://www.dash.org/evolution/" target='_blank' rel='noopener noreferrer'>Evolution</a> release will provide more amazing features and be even easier.
+					</p>
+				</li>
+				<li>
+					<p>
+						MyDashWallet aims to be useful for you, if there is any important feature missing, <a href="https://www.dash.org/forum/threads/mydashwallet-with-tipping-and-hardware-wallet-support.20566/">let us know</a>.
+					</p>
+				</li>
+			</ul>
+		</section>
+	</article>
+</main>
+<div id="send-panel" style="display:none" class="row ng-hide" ng-show="wallet!=null" ng-controller="viewWalletCtrl">
+	<article class="col-sm-8 view-wallet-content">
+		<article class="block" ng-hide="wallet.type=='addressOnly'">
+			<!-- Amount to Send -->
+			<section class="row form-group">
+				<div class="col-sm-11">
+					<label>How much do you want to send?</label>
+				</div>
+				<div class="col-sm-11">
+					<div class="input-group">
+						<input type="number" min="0" step="0.01" class="form-control ng-pristine ng-untouched ng-valid ng-empty is-invalid" placeholder="Amount" id="amount" oninput="updateAmountInfo()" ng-model="tx.value" ng-disabled="tx.readOnly || checkTxReadOnly" ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'">
+						<div class="dropdown input-group-btn">
+							<button id="selectCurrency" style="min-width: 100px" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span id="selectedSendCurrency">mDASH</span> <i class="caret"></i></button>
+							<div class="dropdown-menu" aria-labelledby="selectCurrency">
+								<a class="dropdown-item" onclick="setSendCurrency('mDASH')">mDASH</a>
+								<a class='dropdown-item' onclick="setSendCurrency('DASH')">DASH</a>
+								<a class="dropdown-item" onclick="setSendCurrency('USD')">USD</a>
+								<a class="dropdown-item" onclick="setSendCurrency('EUR')">EUR</a>
+								<a class="dropdown-item" onclick="setSendCurrency('GBP')">GBP</a>
+							</div>
+						</div>
+					</div>
+					<div id="amount-info-box">1 mDASH = 0.001 mDASH = $@ViewData["MilliDashPrices"] (1 DASH = @ViewData["BtcRate"] BTC)</div>
+				</div>
+			</section>
+			<!-- To Address -->
+			<div class="row form-group">
+				<div class="col-xs-11">
+					<label>To Address (coming soon: Email, Twitter, Reddit, Telegram, Discord, ..)</label>
+					<input class="form-control ng-pristine ng-untouched ng-valid ng-empty is-invalid" type="text" id="toAddress" oninput="updateAmountInfo()" placeholder="XoASepVfo1cegWp52HS9gbcKuarLyqxsKT" ng-model="addressDrtv.ensAddressField" ng-disabled="addressDrtv.readOnly" ng-class="Validator.isValidDashAddress(tx.to) ? 'is-valid' : 'is-invalid'">
+				</div>
+			</div>
+
+			<!-- Advanced Options: InstantSend and PrivateSend -->
+			<label><input type="checkbox" id="useInstantSend" value="false" onclick="updateTxFee(0)"> InstantSend: Confirms within 1-2 seconds, tx fee = 0.1 mDASH</label> <a href="/AboutInstantSend" target="_blank">About</a><br />
+			<label><input type="checkbox" id="usePrivateSend" value="false" onclick="updateTxFee(0)"> PrivateSend: Makes transaction untraceable, tx fee = 0.1+ mDASH</label> <a href="/AboutPrivateSend" target="_blank">About</a><br />
+
+			<div class="small-info-box">
+				Transaction cost: <span id="txFeeMDash">0.00226</span> mDASH ($<span id="txFeeUsd">0.0017</span>) <a href="/AboutTransactionFees" target="_blank">About</a>
+			</div>
+
+			@*send raw tx: https://github.com/LedgerHQ/ledger-node-js-api*@
+			<div class="row form-group">
+				<div class="col-xs-12 clearfix">
+					<a class="btn btn-info btn-block" id="generateButton" onclick="generateTransaction()" style="background-color: gray">Generate Transaction</a>
+				</div>
+			</div>
+			<div id="transactionPanel" style="display: none">
+				<ul id="rawTransactionData"></ul>
+			</div>
+			<div class="small-info-box" id="txDetailsPanel" style="word-wrap: break-word;display:none" onclick="showTxDetails()"><ul><li>Click to show raw transaction details for techies.</ul></div>
+			<a class="btn btn-info btn-block" id="signButton" onclick="signAndSendTransaction()" style="background-color: gray; display: none;">Send Signed Transaction</a>
+			<div style="padding-top: 10px; font-size: 15px;" id="resultPanel"></div>
+		</article>
+		
+		<article id="paperWalletPanel" class="block" ng-hide="wallet.type=='addressOnly'" style="display:none">
+			<div style="display:none">
+				<input type="password"/>@*dummy to prevent storing pw for private key unlocking*@
+			</div>
+			<input type="password" id="paperWalletPasswordUnlock" class="form-control" placeholder="Password to unlock private key for PaperWallet" />
+			<a class="btn btn-info btn-block" id="createPaperWalletButton" onclick="createPaperWallet()">Unlock Private Key for PaperWallet</a>
+			<span id="paperWalletError"></span>
+			<div id="paperWalletDetails" style="display: none">
+				<table style="width: 100%; border: 0;margin:0">
+					<tr>
+						<td>
+							<h5>
+								<span>Private Key (unencrypted, never share this with anyone)</span>
+							</h5>
+							<input id="privateKey" class="form-control" readonly="readonly" style="font-size: 14px">
+							<div class="account-help-icon">
+								<img src="/images/icon-help.svg" class="help-icon" style="margin-top: -80px;">
+								<p class="account-help-text">This is the unencrypted text version of your private key, meaning no password is necessary. If someone were to find your unencrypted private key, they could access your wallet without a password. For this reason, encrypted versions (like your Keystore) are typically recommended.</p>
+							</div>
+							<a class="btn btn-info" style="font-size: 18px; text-decoration: none" onclick="window.print()">Print PaperWallet</a>
+						</td>
+						<td width="180"><img id="privateKeyQr" title="Your private key, never share this with anyone!" style="float: right;" /></td>
+					</tr>
+				</table>
+				<div class="small-info-box" style="margin-top: 8px;">
+					You can also go to <a href="https://paper.dash.org" target="_blank" rel="noopener noreferrer">https://paper.dash.org</a> (do this completely offline for better safety), you don't need to be online on MyDashWallet.org or paper.dash.org. On <a href="https://paper.dash.org" target="_blank" rel="noopener noreferrer">paper.dash.org</a> click Wallet Details and enter your private key for more formats: WIF, Compressed
+				</div>
+			</div>
+		</article>
+	</article>
+	<article class="col-sm-4">
+		<aside>
+			<div class="block" style="padding-left: 16px; padding-right:20px;">
+				<h5>
+					Your Account Balance
+					<div id="refreshing-amount-timeout" style="float: right; font-size: 11px;display:none">Refreshing in <span id="balance-check-time">5s</span><br /><img src="/images/ajax-loader.gif" style="float:right" alt="waiting" /></div>
+				</h5>
+				<ul class="account-info point">
+					<li onclick="setTotalAmountToSend()" title="Click to set as amount to send">
+						<b><span id="totalAmountDash" class="mono wrap">0.0</span></b> DASH
+						<br />
+						= <b><span id="totalAmountMDash" class="mono wrap">0.00</span></b> mDASH
+						<br />
+						= <b>$<span id="totalAmountUsd" class="mono wrap">0.00</span></b> USD
+						<br />
+						= <b>€<span id="totalAmountEur" class="mono wrap">0.00</span></b> EUR
+						<br />
+						= <b>£<span id="totalAmountGbp" class="mono wrap">0.00</span></b> GBP
+					</li>
+				</ul>
+				<br />
+				<h5>Your receiving addresses (new to old)</h5>
+				<ul class="account-info" id="addressList">
+					<li>
+						<a href="https://explorer.dash.org/address/XoASepVfo1cegWp52HS9gbcKuarLyqxsKT" target="_blank" rel="noopener noreferrer">
+							<img src="/images/QrCodeWhenUnlocked.png" title="Your freshest Dash Address should be used for receiving Dash, you will get a new one once this has been used!" /><br />
+							XoASepVfo1cegWp52HS9gbcKuarLyqxsKT
+						</a>
+						<div class="address-amount">0 mDASH</div>
+					</li>
+				</ul>
+			</div>
+			<!-- Hardware Wallets -->
+			<a href="/AboutHardwareWallets" ng-show="slide==1 || ajaxReq.type!=='DASH'" class="block swap--hw ng-hide" target="_blank" rel="noopener noreferrer" id="hardware-wallets-panel">
+				<div class="col-sm-7">
+					<h6 class="swap__cta ng-hide" ng-show="wallet.balance<=1">Learn more about protecting your funds.</h6>
+					<p>Are you as secure as you can be?</p>
+				</div>
+				<div class="col-sm-5">
+					<img src="/images/logo-ledger.svg" width="80" class="swap__logo">
+					<br>
+					<img src="/images/logo-trezor.svg" width="80" class="swap__logo">
+				</div>
+			</a>
+			<!-- uphold -->
+			<a href="https://uphold.com/" ng-show="ajaxReq.type=='DASH' &amp;&amp; slide==2" class="block swap--usd" target="_blank" rel="noopener noreferrer">
+				<div class="col-sm-8">
+					<p class="swap__subhead ng-hide" ng-show="wallet.balance<=0">Need a fast and quick way to get some DASH?</p>
+					<h6 class="swap__cta">Easily Buy DASH with USD or EUR</h6>
+				</div>
+				<div class="col-sm-5">
+					<img src="https://uphold.com/release/images/logo@1x.2562c7e4.png" width="106" height="auto" class="swap__logo">
+					<p class="swap-flag--price">1 DASH ≈ <br> @ViewData["DashPrices"]</p>
+				</div>
+			</a>
+			<!-- discover dash -->
+			<a href="https://discoverdash.com/" class="block swap--usd" target="_blank" rel="noopener noreferrer">
+				<div style="background-color: white; padding: 4px; color: black">
+					Explore Dash Merchants & Events Near You!
+					<img src="/images/DiscoverDash.png" alt="Discover Dash" />
+				</div>
+			</a>
+			<!-- piiko -->
+			<a href="https://www.piiko.co/" class="block swap--usd" target="_blank" rel="noopener noreferrer">
+				<div style="background-color: white; padding: 4px; color: black">
+					Use Piiko to top up your mobile phone
+					<img src="/images/Piiko.png" alt="Piiko" />
+				</div>
+			</a>
+		</aside>
+	</article>
+</div>

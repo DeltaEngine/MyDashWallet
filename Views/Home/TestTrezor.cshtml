@@ -1,0 +1,224 @@
+﻿@{
+    ViewData["Title"] = "Test Trezor Hardware Wallet";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<script>
+	function trezorGetAccount() {
+		TrezorConnect.setCurrency("Dash");
+		TrezorConnect.getAccountInfo("m/44'/5'/0'", function (response) {
+			if (response.success) {
+				console.log('Account ID: ', response.id);
+				console.log('Account path: ', response.path);
+				console.log('Serialized account path: ', response.serializedPath);
+				console.log('Xpub', response.xpub);
+
+				console.log('Fresh address (first unused address): ', response.freshAddress);
+				console.log('Fresh address ID: ', response.freshAddressId);
+				console.log('Fresh address path: ', response.freshAddressPath);
+				console.log('Serialized fresh address path: ', response.serializedFreshAddressPath);
+
+				console.log('Balance in satoshis (including unconfirmed):', response.balance);
+				console.log('Balance in satoshis (only confirmed):', response.confirmed);
+
+			} else {
+				console.error('Error getting account:', response.error); // error message
+			}
+			document.getElementById("response").innerHTML = JSON.stringify(response, undefined, 2);
+		});
+	}
+
+	function trezorSignTx() {
+		//all this get address/utxo stuff is not required on Trezor, we can simply use:
+		var outputs = [{
+			address: "XoASepVfo1cegWp52HS9gbcKuarLyqxsKT",
+			amount: 10000 //in duff
+		}];
+		TrezorConnect.composeAndSignTx(outputs, function (result) {
+			if (result.success) {
+				/*requires a second confirmation, rather do it on MyDashWallet and also support InstantSend there
+				TrezorConnect.pushTransaction(result.serialized_tx, function (pushResult) {
+					if (pushResult.success) {
+						console.log('Transaction pushed. Id:', pushResult.txid); // ID of the transaction
+					} else {
+						console.error('Error:', pushResult.error); // error message
+					}
+				});
+				*/
+			} else {
+				console.error('Error signing:', result.error); // error message
+			}
+		});
+	}
+	/*better to use account on trezor:
+	//https://github.com/trezor/connect
+	function trezorGetAddress() {
+		var path = "m/44'/5'/0'";
+		var coin = "Dash";
+		TrezorConnect.getAddress(path, coin, false, function (response) {
+			console.log("TrezorConnect.getAddress response", response);
+			document.getElementById("response").innerHTML = JSON.stringify(response, undefined, 2);
+		});
+	}
+	/*unused
+	function trezorGetXPubKey() {
+		var path = document.getElementById('account_path').value;
+		var coin = document.getElementById('coin').value;
+
+		if (path.length < 1 || document.getElementById('account_path').disabled) path = null;
+
+		// var path = [44 | 0x80000000,
+		//             0  | 0x80000000,
+		//             0  | 0x80000000 ]; // path in raw form
+
+		TrezorConnect.setCurrency(coin); // set backend
+		/*not sure why we would need this
+		TrezorConnect.getXPubKey(path, function (response) {
+			if (response.success) {
+				console.log('XPUB:', response.xpubkey); // serialized XPUB
+				console.log('Raw path:', response.path);
+				console.log('Serialized path:', response.serializedPath);
+			} else {
+				console.error('Error:', response.error); // error message
+			}
+			document.getElementById("response").innerHTML = JSON.stringify(response, undefined, 2);
+		});
+		*
+		TrezorConnect.getAddress(path, coin, false, function (response) {
+			console.log("TrezorConnect.getAddress response", response);
+			document.getElementById("response").innerHTML = JSON.stringify(response, undefined, 2);
+		});
+
+	}
+
+	function handleCoinChange() {
+		//TODO: useful? If you omit the path, BIP-0044 account discovery is performed and user is presented with a list of discovered accounts. Node of selected account is then exported. Example.
+		var defaultPaths = {
+			"Bitcoin": "m/49'/0'/0'",
+			"Bitcoin Cash": "m/44'/145'/0'",
+			"Litecoin": "m/49'/2'/0'",
+			"Dogecoin": "m/44'/3'/0'",
+			"Dash": "m/44'/5'/0'",
+			"Zcash": "m/44'/133'/0'",
+			"Testnet": "m/49'/1'/0'",
+			"Namecoin": "m/44'/7'/0'",
+		}
+
+		var coin = document.getElementById('coin').value;
+		document.getElementById('account_path').value = defaultPaths[coin];
+
+		var checkbox = document.getElementById('discovery')
+		if (coin === 'Dogecoin' || coin === 'Namecoin') {
+			checkbox.checked = false;
+			checkbox.disabled = true;
+			document.getElementById('account_path').disabled = false;
+		} else {
+			checkbox.disabled = false;
+		}
+	}
+
+	function handleDiscoveryChange(element) {
+		document.getElementById('account_path').disabled = element.checked;
+	}
+
+
+	
+
+    // this example requires a device loaded with seed:
+    // alcohol woman abuse must during monitor noble actual mixed trade anger aisle
+
+    // Python tests:
+    // https://github.com/trezor/python-trezor/blob/master/tests/device_tests/test_msg_signtx.py
+
+    function trezorSignTx(testId) {
+
+        // legacy input
+        var inp1 = {
+            //address_n: [44 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0],
+            address_n: [0],
+            prev_index: 0,
+            prev_hash: "d5f65ee80147b4bcc70b75e4bbf2d7382021b871bd8867ef8fa525ef50864882"
+        };
+
+        // segwit input
+        var inp2 = {
+            address_n: [49 | 0x80000000, 1 | 0x80000000, 0 | 0x80000000, 1, 0],
+            amount: 123456789,
+            prev_index: 0,
+            prev_hash: "20912f98ea3ed849042efed0fdac8cb4fc301961c5988cba56902d8ffb61c337",
+            script_type: "SPENDP2SHWITNESS"
+        };
+
+        // legacy outputs
+        var out1 = {
+            address: '1MJ2tj2ThBE62zXbBYA5ZaN3fdve5CPAz1',
+            amount: 390000 - 10000,
+            script_type: 'PAYTOADDRESS'
+        }
+        // 
+        var out2 = {
+            //address_n: [44 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 1, 0],
+            address_n: [1],
+            amount: 80000,
+            script_type: 'PAYTOADDRESS'
+        }
+
+
+
+        // segwit outputs
+        var out3 = {
+            address: "mhRx1CeVfaayqRwq5zgRQmD7W5aWBfD5mC",
+            amount: 12300000,
+            script_type: "PAYTOADDRESS"
+        }
+        var out4 = {
+            address_n: [49 | 0x80000000, 1 | 0x80000000, 0 | 0x80000000, 1, 0],
+            script_type: "PAYTOP2SHWITNESS",
+            amount: 123456789 - 11000 - 12300000,
+        }
+
+        var inputs, outputs;
+        switch(testId) {
+            case 0: // One output external
+                inputs = [ inp1 ];
+                outputs = [ out1 ];
+                TrezorConnect.setCurrency('btc');
+            break;
+            case 1: // First output external, second output internal
+                var cloneOfOut1 = JSON.parse(JSON.stringify(out1));
+                cloneOfOut1.amount = out1.amount - out2.amount;
+                inputs = [ inp1 ];
+                outputs = [ cloneOfOut1, out2 ];
+                TrezorConnect.setCurrency('btc');
+            break;
+            case 2: // Segwit input, Segwit change output + external output
+                inputs = [ inp2 ];
+                outputs = [ out3, out4 ];
+                TrezorConnect.setCurrency('testnet');
+            break;
+        }
+        
+        TrezorConnect.signTx(inputs, outputs, function (response) {
+            if (response.success) {
+                console.log('Serialized TX:', response.serialized_tx); // tx in hex
+                console.log('Signatures:', response.signatures); // array of signatures, in hex
+            } else {
+                console.error('Error:', response.error); // error message
+            }
+            document.getElementById("response").innerHTML = JSON.stringify(response, undefined, 2);
+        });
+    }
+
+    
+
+	*/
+
+	// Make sure we use trezors popup
+	window.TREZOR_POPUP_ORIGIN = 'https://connect.trezor.io';
+</script>
+
+	<button onclick="trezorGetAccount()" style="display: inline-block;">Get Trezor DASH Account</button>
+	<pre id="response"></pre>
+<button onclick="trezorSignTx()" style="display: inline-block;">Trezor Sign Tx</button>
+	<script src="https://connect.trezor.io/4/connect.js"></script>

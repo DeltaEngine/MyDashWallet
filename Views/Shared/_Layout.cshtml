@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>MyDashWallet.org</title>
+	<base href="~/" />
+	<link rel="icon" href="/favicon.ico">
+	@*<link rel="stylesheet" href="~/dist/vendor.css" asp-append-version="true" />*@
+	<link rel="stylesheet" href="~/css/market.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+	<div class="small announcement annoucement-danger" style="display:none">
+		<div class="container">
+			2018-01-12: Version 0.1: Hardware wallets, creating local wallets, sending dash and exploring fully implemented
+		</div>
+	</div>
+	<section class="bg-gradient header-branding">
+		<section class="container">
+			<a class="brand" href="/" aria-label="Go to homepage">
+				<img src="/images/MyDashWallet.png" height="62" width="246" alt="MyDashWallet">
+			</a>
+			<div class="tagline" style="display: block; margin-right: 0; padding-right: 0; position: relative;float: right; font-weight: bold; text-align: right">
+				<span style="margin-right: 4px" title="Data from CoinMarketCap.com">1 DASH = @ViewData["DashPrices"]</span>
+				<br />
+				<span style="margin-right: 8px" title="1 mDASH = 0.001 DASH. Data from CoinMarketCap.com">1 mDASH = @ViewData["MilliDashPrices"]</span>
+			</div>
+		</section>
+	</section>
+	<div class="container body-content">
+		<ul class="nav navbar-nav" style="padding-left:0">
+			<li>
+				<a asp-area="" asp-controller="Home" asp-action="Index"><span id="main-page-title">Unlock Wallet</span></a>
+			</li>
+			<li>
+				<a asp-area="" asp-controller="Home" asp-action="Address"><span class="skip-when-small">Check </span>Address</a>
+			</li>
+			<li>
+				<a asp-area="" asp-controller="Home" asp-action="Transaction"><span class="skip-when-small">Check </span>Transaction</a>
+			</li>
+			@*not yet implemented <li>
+			<a asp-area="" asp-controller="Home" asp-action="Swap">Swap</a>
+		</li>
+		<li>
+			<a asp-area="" asp-controller="Home" asp-action="Tipping">Tipping</a>
+		</li>*@
+			<li>
+				<a asp-area="" asp-controller="Home" asp-action="About">Help</a>
+			</li>
+			<li class="skip-when-small">
+				<a asp-area="" asp-controller="Home" asp-action="AboutVideos">Videos</a>
+			</li>
+		</ul>
+		<div style="clear: both;"></div>
+		<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+						asp-fallback-src="~/lib/jquery/dist/jquery.js"
+						asp-fallback-test="window.jQuery"
+						crossorigin="anonymous"
+						integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
+		</script>
+		<script>
+			function copyToClipboard(element) {
+				var $temp = $("<input>");
+				$("body").append($temp);
+				$temp.val($(element).text() === "" ? element : $(element).text()).select();
+				document.execCommand("copy");
+				$temp.remove();
+			}
+		</script>
+		@RenderBody()
+		<hr />
+		<footer>
+			<p>
+				&copy; 2018 MyDashWallet, funded by the <a href="https://www.dashcentral.org/">DASH network</a>, design based on <a href="//MyEtherWallet.com">MyEtherWallet.com</a>, created by <a href="https://DeltaEngine.net">DeltaEngine.net</a>
+			</p>
+		</footer>
+	</div>
+	<div style="background-color: lightgray; margin: 0">
+	<div class="container extraFooter">
+		<p>
+			MyDashWallet.org does not hold your keys for you. We cannot access accounts, recover keys, reset passwords, nor reverse transactions. Protect your keys!
+			<a href="/About" role="link" tabindex="0" data-toggle="modal" data-target="#disclaimerModal">You are responsible for your security.</a>
+		</p>
+		<p>
+			<icon aria-hidden="true">💝</icon> Donations are always appreciated!
+			Dash: <span class="mono wrap"><a title="Click to copy this Dash address" id="donationAddress" onclick="copyToClipboard('XoASepVfo1cegWp52HS9gbcKuarLyqxsKT')">XoASepVfo1cegWp52HS9gbcKuarLyqxsKT</a></span> <a title="Click to send Dash to our donation address" href="dash:XoASepVfo1cegWp52HS9gbcKuarLyqxsKT" target="_blank" rel="noopener noreferrer">Donate via external wallet</a>
+		</p>
+	</div>
+	</div>
+	@*<script src="~/dist/vendor.js" asp-append-version="true"></script>*@
+	@RenderSection("scripts", required: false)
+</body>
+</html>

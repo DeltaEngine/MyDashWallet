@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+#excluded files
+node_modules/
+obj/
+bin/
+Full/
+.vs/
+packages/
+_NCRUNCH_*
+*.user
+CustomProfile.pubxml
+*.config
