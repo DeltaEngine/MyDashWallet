@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyDashWallet", "MyDashWallet.csproj", "{E97AD52F-059B-4E55-A572-2E45141FA5C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyDashWallet.Node", "..\..\MyDashWallet\Node\MyDashWallet.Node.csproj", "{99B6996D-D531-4520-B5A6-B378CC56B5AA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyDashWallet.Node.Full", "..\..\MyDashWallet\Node\Full\MyDashWallet.Node.Full.csproj", "{9A889EC7-4E7F-404E-A4C0-29F5CD65AF12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinLib", "..\..\MyDashWallet\Node\BitcoinLib\BitcoinLib.csproj", "{87ADBDD7-4915-4B2B-8159-529FA441E0FD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyDashWallet.Database", "..\..\MyDashWallet\Database\MyDashWallet.Database.csproj", "{DAF769CD-C9B3-48BD-864F-B84CA59C5298}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocialCryptoBots", "..\..\SocialCryptoBots\SocialCryptoBots.csproj", "{BB9E4ECC-758C-4ABC-96BA-EBE5A1222519}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E97AD52F-059B-4E55-A572-2E45141FA5C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E97AD52F-059B-4E55-A572-2E45141FA5C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E97AD52F-059B-4E55-A572-2E45141FA5C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E97AD52F-059B-4E55-A572-2E45141FA5C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99B6996D-D531-4520-B5A6-B378CC56B5AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99B6996D-D531-4520-B5A6-B378CC56B5AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99B6996D-D531-4520-B5A6-B378CC56B5AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99B6996D-D531-4520-B5A6-B378CC56B5AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A889EC7-4E7F-404E-A4C0-29F5CD65AF12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A889EC7-4E7F-404E-A4C0-29F5CD65AF12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A889EC7-4E7F-404E-A4C0-29F5CD65AF12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A889EC7-4E7F-404E-A4C0-29F5CD65AF12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87ADBDD7-4915-4B2B-8159-529FA441E0FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87ADBDD7-4915-4B2B-8159-529FA441E0FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87ADBDD7-4915-4B2B-8159-529FA441E0FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87ADBDD7-4915-4B2B-8159-529FA441E0FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAF769CD-C9B3-48BD-864F-B84CA59C5298}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAF769CD-C9B3-48BD-864F-B84CA59C5298}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAF769CD-C9B3-48BD-864F-B84CA59C5298}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAF769CD-C9B3-48BD-864F-B84CA59C5298}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB9E4ECC-758C-4ABC-96BA-EBE5A1222519}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB9E4ECC-758C-4ABC-96BA-EBE5A1222519}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB9E4ECC-758C-4ABC-96BA-EBE5A1222519}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB9E4ECC-758C-4ABC-96BA-EBE5A1222519}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FB3C1846-35D2-4BE2-8957-B6CD0A983DEC}
+	EndGlobalSection
+EndGlobal

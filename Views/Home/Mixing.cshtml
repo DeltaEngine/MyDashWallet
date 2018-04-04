@@ -1,0 +1,61 @@
+﻿@{
+	ViewData["Title"] = "Mixing";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+MyDashWallet allows you to mix your Dash without having to create a wallet here, simply enter where you want to anonymously send Dash to and send any amount of Dash to the address provided below. Check the mixing pool amount in the header, if there is enough Dash premixed, your tx will be processed immediately. Otherwise PrivateSend mixing (build-in Dash feature) will be utilized. This service and website is non-profit, the PrivateSend and mining cost are paid to the Dash network like when using a full node wallet.
+<br /><br />
+<h3>Enter Address to send to anonymously</h3>
+<input class="form-control is-invalid" style="margin-top:1px" type="text" id="toAddress" oninput="updateGenerateAddressButton()" placeholder="XoASepVfo1cegWp52HS9gbcKuarLyqxsKT">
+PrivateSend tx fee: <b>0.25 mDASH + 0.05 mDASH</b> per mixed input (e.g. 15.2 mDASH is split into 10+5*1+0.2 mDASH -> tx fee: 0.6 mDASH) <a href="/AboutPrivateSend" target="_blank">About</a><br />
+<a class="btn btn-info btn-block" id="generateAddressButton" onclick="generateAddress()" style="background-color: gray">Generate Private Send Address</a>
+<br />
+<div id="generateAddressPanel"></div>
+<script>
+	function copyToClipboard(element) {
+		var $temp = $("<input>");
+		$("body").append($temp);
+		$temp.val($(element).text()).select();
+		document.execCommand("copy");
+		$temp.remove();
+		if (element === "XoASepVfo1cegWp52HS9gbcKuarLyqxsKT") {
+			$("#toAddress").val(element);
+			$("#generateAddressButton").css("backgroundColor", "#1c75bc").removeAttr("disabled");
+		}
+	}
+	function updateGenerateAddressButton() {
+		if (isValidDashAddress($("#toAddress").val()))
+			$("#generateAddressButton").css("backgroundColor", "#1c75bc").removeAttr("disabled");
+		else
+			$("#generateAddressButton").css("backgroundColor", "gray").attr("disabled", "disabled");
+	}
+	function isValidDashAddress(address) {
+		return address && address.length >= 34 && (address[0] === 'X' || address[0] === 'x');
+	}
+	function generateAddress() {
+		$("#generateAddressButton").css("backgroundColor", "gray").attr("disabled", "disabled");
+		var toAddress = $("#toAddress").val();
+		if (isValidDashAddress($("#toAddress").val()))
+			$.get("/GeneratePrivateSendAddress?toAddress=" + toAddress).done(
+				function(address) {
+					var qrCodeSrc = "//chart.googleapis.com/chart?cht=qr&chl=dash:" + address + "&choe=UTF-8&chs=240x240&chld=L|0";
+					$("#generateAddressPanel").html(
+						"Send any amount of DASH to the following address, it will be mixed and send to <b>" +
+						toAddress +
+						"</b> when done.<br />" +
+						"Once Dash is received and mixed at this address, the receive address will be deleted and cannot be used anymore.<br />" +
+						"<b style='font-size:18pt'>" +
+						address +
+						"</b>" +
+						"<br /><br />" +
+						"<img title='scan qr code' src='" +
+						qrCodeSrc +
+						"' />");
+				}).fail(function(jqxhr) {
+				$("#generateAddressPanel").css("color", "red").text("Server Error: " + jqxhr.responseText);
+			});
+		else
+			$("#generateAddressPanel").html("Please enter a valid Dash address first!");
+	}
+</script>

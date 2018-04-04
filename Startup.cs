@@ -1,4 +1,3 @@
-//#define ALLOW_TESTNET
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,11 +13,7 @@ namespace MyDashWallet
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc();
-#if DEBUG && ALLOW_TESTNET
-			services.AddSingleton<Services.DashNode, Services.TestnetDashNode>();
-#else
-			services.AddSingleton<Services.DashNode, Services.Full.FullDashNode>();
-#endif
+			services.AddSingleton<Node.DashNode, Node.TestnetDashNode>();
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)

@@ -6,6 +6,7 @@
 		$("#hardware-wallets-panel").hide();
 	$("#title").text("Send Dash");
 	$("#response").show().css("color", "black").html(successfullyConnectedMessage);
+	$("#resultPanel").text("");
 	$("#main-page-title").text("Close Wallet");
 }
 
@@ -125,37 +126,42 @@ function updateLocalStorageBalancesAndRefreshTotalAmountAndReceivingAddresses() 
 // ReSharper disable UseOfImplicitGlobalInFunctionScope
 	document.getElementById("totalAmountUsd").innerHTML = showNumber(totalAmount * usdRate, 2);
 	document.getElementById("totalAmountEur").innerHTML = showNumber(totalAmount * eurRate, 2);
-	document.getElementById("totalAmountGbp").innerHTML = showNumber(totalAmount * gbpRate, 2);
 	generateReceivingAddressList();
 }
 
 function getFreshestAddress() {
 	if (trezorDash)
 		return trezorDash.freshAddress;
-	var freshestAddress = "";
+	var freshestAddress = dashKeystoreWallet ? dashKeystoreWallet.address : "";
 	$.each(addressBalances, function (address) { freshestAddress = address; });
 	return freshestAddress;
+}
+
+function addAddressBalance(list, address, balance, freshestAddress) {
+	var qrImg = "//chart.googleapis.com/chart?cht=qr&chl=dash:" + address + "&choe=UTF-8&chs=140x140&chld=L|0";
+	$("<li><a href='https://explorer.dash.org/address/" +
+		address +
+		"' target='_blank' rel='noopener noreferrer'>" +
+		(address === freshestAddress
+			? "<img width='140' height='140' src='" +
+			qrImg +
+			"' title='Your freshest Dash Address should be used for receiving Dash, you will get a new one once this has been used!' /><br/>"
+			: "") +
+		address +
+		"</a><div class='address-amount' onclick='setAmountToSend(" + balance + ")'>" +
+		showDashOrMDashNumber(balance) + "</div></li>").prependTo(list);
 }
 
 function generateReceivingAddressList() {
 	var list = $("#addressList");
 	list.empty();
 	var freshestAddress = getFreshestAddress();
-	$.each(addressBalances,
-		function (address, balance) {
-			var qrImg = "//chart.googleapis.com/chart?cht=qr&chl=dash:" + address + "&choe=UTF-8&chs=140x140&chld=L|0";
-			$("<li><a href='https://explorer.dash.org/address/" +
-				address +
-				"' target='_blank' rel='noopener noreferrer'>" +
-				(address === freshestAddress
-					? "<img width='140' height='140' src='" +
-					qrImg +
-					"' title='Your freshest Dash Address should be used for receiving Dash, you will get a new one once this has been used!' /><br/>"
-					: "") +
-				address +
-				"</a><div class='address-amount' onclick='setAmountToSend("+balance+")'>" +
-				showDashOrMDashNumber(balance) + "</div></li>").prependTo(list);
+	if (getNumberOfAddresses() > 0)
+		$.each(addressBalances, function(address, balance) {
+			addAddressBalance(list, address, balance, freshestAddress);
 		});
+	else
+		addAddressBalance(list, freshestAddress, 0, freshestAddress);
 }
 
 function setAddressAndLookForLastUsedHdWalletAddress(firstAddress) {
@@ -366,7 +372,6 @@ function unlockTrezor(showResponse) {
 			document.getElementById("totalAmountMDash").innerHTML = showNumber(totalAmount * 1000, 5);
 			document.getElementById("totalAmountUsd").innerHTML = showNumber(totalAmount * usdRate, 2);
 			document.getElementById("totalAmountEur").innerHTML = showNumber(totalAmount * eurRate, 2);
-			document.getElementById("totalAmountGbp").innerHTML = showNumber(totalAmount * gbpRate, 2);
 			var list = $("#addressList");
 			list.empty();
 			var address = response.freshAddress;
@@ -397,8 +402,6 @@ function setAmountToSend(amount) {
 		amount *= usdRate;
 	if (sendCurrency === "EUR")
 		amount *= eurRate;
-	if (sendCurrency === "GBP")
-		amount *= gbpRate;
 	$("#amount").val(amount);
 	updateAmountInfo();
 }
@@ -411,21 +414,22 @@ function getPrivateSendNumberOfInputsBasedOnAmount() {
 	if (amountToSend <= 0.01)
 		return 1;
 	var numberOfPrivateSendInputsNeeded = 1;
-	while (amountToSend > 10) {
+	var checkAmountToSend = amountToSend;
+	while (checkAmountToSend > 10) {
 		numberOfPrivateSendInputsNeeded++;
-		amountToSend -= 10;
+		checkAmountToSend -= 10;
 	}
-	while (amountToSend > 1) {
+	while (checkAmountToSend > 1) {
 		numberOfPrivateSendInputsNeeded++;
-		amountToSend -= 1;
+		checkAmountToSend -= 1;
 	}
-	while (amountToSend > 0.1) {
+	while (checkAmountToSend > 0.1) {
 		numberOfPrivateSendInputsNeeded++;
-		amountToSend -= 0.1;
+		checkAmountToSend -= 0.1;
 	}
-	while (amountToSend > 0.01) {
+	while (checkAmountToSend > 0.01) {
 		numberOfPrivateSendInputsNeeded++;
-		amountToSend -= 0.01;
+		checkAmountToSend -= 0.01;
 	}
 	return numberOfPrivateSendInputsNeeded;
 }
@@ -454,7 +458,7 @@ function updateTxFee(numberOfInputs) {
 	// PrivateSend number of needed inputs depends on the amount, not on the inputs (fee for that
 	// is already calculated above). Details on the /AboutPrivateSend help page
 	if ($("#usePrivateSend").is(':checked'))
-		txFee += 0.1 + 0.01 * getPrivateSendNumberOfInputsBasedOnAmount();
+		txFee += 0.25 + 0.05 * getPrivateSendNumberOfInputsBasedOnAmount();
 	$("#txFeeMDash").text(showNumber(txFee, 5));
 	$("#txFeeUsd").text(showNumber(txFee * usdRate / 1000, 4));
 	if (amountToSend < DUST_AMOUNT_IN_DASH || amountToSend > parseFloat($("#totalAmountDash").text()) ||
@@ -469,8 +473,68 @@ function setSendCurrency(newSendCurrency) {
 	$("#selectedSendCurrency").text(newSendCurrency);
 	updateAmountInfo();
 }
-
-// Doesn't make much sense to send less than 1 mDASH for PrivateSend (as fees will be >10-20%)
+function getChannel() {
+	return $("#sendToEmail").is(":checked")
+		? "Email"
+		: $("#sendToTwitter").is(":checked")
+		? "Twitter"
+		: $("#sendToReddit").is(":checked")
+		? "Reddit"
+		: $("#sendToDiscord").is(":checked")
+		? "Discord"
+		: "Address";
+}
+function getChannelAddress() {
+	return $("#sendToEmail").is(":checked")
+		? $("#toEmail").val()
+		: $("#sendToTwitter").is(":checked")
+		? $("#toTwitter").val()
+		: $("#sendToReddit").is(":checked")
+		? $("#toReddit").val()
+		: $("#sendToDiscord").is(":checked")
+		? $("#toDiscord").val()
+		: $("#toAddress").val();
+}
+function getChannelExtraText() {
+	return $("#sendToEmail").is(":checked")
+		? $("#toEmailExtraText").val()
+		: $("#sendToTwitter").is(":checked")
+		? $("#toTwitterExtraText").val()
+		: $("#sendToReddit").is(":checked")
+		? $("#toRedditExtraText").val()
+		: $("#sendToDiscord").is(":checked")
+		? $("#toDiscordExtraText").val()
+		: "";
+}
+function isValidEmail(email) {
+	var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	return re.test(email);
+}
+function isValidTwitterUsername(username) {
+	return /^@[a-zA-Z0-9_]{1,15}$/.test(username);
+}
+function isValidDiscordUsername(username) {
+	return /^@(.*)#[0-9]{4}$/.test(username);
+}
+function isValidRedditUsername(username) {
+	return username.startsWith('/u/') && username.length > 4 && username.indexOf(' ') < 0;
+}
+function isValidSendTo() {
+	var channel = getChannel();
+	var sendTo = getChannelAddress();
+	if (channel === "Address")
+		return isValidDashAddress(sendTo);
+	else if (channel === "Email")
+		return isValidEmail(sendTo);
+	else if (channel === "Twitter")
+		return isValidTwitterUsername(sendTo);
+	else if (channel === "Discord")
+		return isValidDiscordUsername(sendTo);
+	else if (channel === "Reddit")
+		return isValidRedditUsername(sendTo);
+	return false;
+}
+// Doesn't make much sense to send less than 1 mDASH for PrivateSend (as fees will be >25%)
 var MinimumForPrivateSend = 0.001;
 function updateAmountInfo() {
 	var amount = parseFloat($("#amount").val());
@@ -484,8 +548,6 @@ function updateAmountInfo() {
 		amount /= usdRate;
 	if (sendCurrency === "EUR")
 		amount /= eurRate;
-	if (sendCurrency === "GBP")
-		amount /= gbpRate;
 	amountToSend = amount;
 	if (amountToSend < DUST_AMOUNT_IN_DASH || amountToSend > parseFloat($("#totalAmountDash").text()) ||
 		$("#usePrivateSend").is(':checked') && amountToSend < MinimumForPrivateSend)
@@ -495,11 +557,9 @@ function updateAmountInfo() {
 		showNumber(amountToSend * 1000, 5) + " mDASH " +
 		"= " + showNumber(amountToSend, 8) + " DASH " +
 		"= $" + showNumber(amountToSend * usdRate, 2) + " " +
-		"= €" + showNumber(amountToSend * eurRate, 2) + " " +
-		"= £" + showNumber(amountToSend * gbpRate, 2) +
-		" (1 DASH = " + btcRate + " BTC)");
+		"= €" + showNumber(amountToSend * eurRate, 2) + " (1 DASH = " + btcRate + " BTC)");
 	updateTxFee(0);
-	if (amountIsValid && isValidDashAddress($("#toAddress").val())) {
+	if (amountIsValid && isValidSendTo()) {
 		$("#generateButton").css("backgroundColor", "#1c75bc").removeAttr("disabled");
 	} else {
 		$("#generateButton").css("backgroundColor", "gray").attr("disabled", "disabled");
@@ -539,14 +599,25 @@ function generateTransaction() {
 	else
 		addNextAddressWithUnspendFundsToRawTx(getAddressesWithUnspendFunds(), 0, getFreshestAddress(), 0, [], [], [], "");
 }
-
 function generateTrezorSignedTx() {
 	//all this get address/utxo stuff is not required on Trezor, we can simply use (however without InstantSend support, maybe the user can select 10000duff fee (10mDASH) to allow InstantSend):
-	var toAddress = $("#toAddress").val();
+	var channel = getChannel();
+	var sendTo = getChannelAddress();
 	var txFee = parseFloat($("#txFeeMDash").text()) / 1000;
+	// Minimum fee we need to use for sending is 0.1mDASH, otherwise trezor reports:
+	// Account funds are insufficient. Retrying...
+	if (txFee < 0.1 / 1000) {
+		txFee = 0.1 / 1000;
+		$("#extraTxNotes").text(
+			"TREZOR requires currently to have at least 0.1mDASH for fees, even if you choose lower ones when actually sending. ");
+	}
+	var maxAmountPossible = parseFloat($("#totalAmountDash").text());
+	// If we send everything, subtract txFee so we can actually send everything
+	if (amountToSend+txFee >= maxAmountPossible)
+		amountToSend = maxAmountPossible - txFee;
 	var outputs = [
 		{
-			address: toAddress,
+			address: sendTo,
 			amount: Math.round(amountToSend * 100000000) //in duff
 		}
 	];
@@ -556,15 +627,15 @@ function generateTrezorSignedTx() {
 	// our MyDashWallet service, it still will work out of the box. PrivateSend is deferred anyway.
 	var useInstantSend = $("#useInstantSend").is(':checked');
 	var usePrivateSend = $("#usePrivateSend").is(':checked');
-	if (usePrivateSend) {
+	if (usePrivateSend || channel !== "Address") {
 		// PrivateSend needs to generate the raw tx just to get the new privatesend address
 		var utxosTextWithOutputIndices = "0";
 		var remainingDash = 0;
 		var remainingAddress = getFreshestAddress();
-		$.getJSON("/GenerateRawTx?utxos="+utxosTextWithOutputIndices+"&amountToAddress="+showNumber(amountToSend, 8)+"|"+toAddress+"&remainingAmountToAddress="+showNumber(remainingDash, 8)+"|"+remainingAddress+"&instantSend="+useInstantSend+"&privateSend="+usePrivateSend).done(
+		$.getJSON("/GenerateRawTx?utxos="+utxosTextWithOutputIndices+"&channel="+channel+"&amount="+showNumber(amountToSend, 8)+"&sendTo="+sendTo.replace('#','|')+"&remainingAmount="+showNumber(remainingDash, 8)+"&remainingAddress="+remainingAddress+"&instantSend="+useInstantSend+"&privateSend="+usePrivateSend+"&extraText="+getChannelExtraText()).done(
 			function (data) {
 				txFee = data["usedSendTxFee"];
-				var rawTxList = showRawTxPanel(toAddress, txFee,
+				var rawTxList = showRawTxPanel(sendTo, txFee,
 					data["redirectedPrivateSendAddress"],
 					data["redirectedPrivateSendAmount"]);
 				outputs = [
@@ -573,6 +644,7 @@ function generateTrezorSignedTx() {
 						amount: Math.round(data["redirectedPrivateSendAmount"] * 100000000) //in duff
 					}
 				];
+				if (usePrivateSend)
 				$("<li>Please confirm this PrivateSend transaction on your TREZOR hardware device (make sure the PrivateSend target address "+data["redirectedPrivateSendAddress"]+" matches what you see on the screen), use <b>economy</b> fees!</li>").appendTo(rawTxList);
 				TrezorConnect.composeAndSignTx(outputs, function (result) {
 					if (result.success) {
@@ -600,7 +672,7 @@ function generateTrezorSignedTx() {
 			});
 		return;
 	}
-	var rawTxList = showRawTxPanel(toAddress, txFee, toAddress, 1);
+	var rawTxList = showRawTxPanel(sendTo, txFee, sendTo, 1);
 	if (useInstantSend)
 		$("<li>Please confirm this transaction on your TREZOR hardware device. Since you have selected InstantSend, it will only go through if you manually set the fee to 10000 duffs (0.1mDASH)!</li>").appendTo(rawTxList);
 	else
@@ -699,7 +771,8 @@ function addNextAddressWithUnspendFundsToRawTx(addressesWithUnspendInputs, addre
 						//debug: inputListText += "<li>"+txToUse[index]+", "+txOutputIndexToUse[index]+"</li>";
 						utxosTextWithOutputIndices += txToUse[index] + "|" + txOutputIndexToUse[index] + "|";
 					}
-					var toAddress = $("#toAddress").val();
+					var channel = getChannel();
+					var sendTo = getChannelAddress();
 					var useInstantSend = $("#useInstantSend").is(':checked');
 					var usePrivateSend = $("#usePrivateSend").is(':checked');
 					$("#rawTransactionData").empty();
@@ -711,14 +784,14 @@ function addNextAddressWithUnspendFundsToRawTx(addressesWithUnspendInputs, addre
 					// Update amountToSend in case we had to reduce it a bit to allow for the txFee
 					amountToSend = totalAmountNeeded - txFee;
 					var remainingDash = txAmountTotal - totalAmountNeeded;
-					$.getJSON("/GenerateRawTx?utxos="+utxosTextWithOutputIndices+"&amountToAddress="+showNumber(amountToSend, 8)+"|"+toAddress+"&remainingAmountToAddress="+showNumber(remainingDash, 8)+"|"+remainingAddress+"&instantSend="+useInstantSend+"&privateSend="+usePrivateSend).done(
+					$.getJSON("/GenerateRawTx?utxos=" + utxosTextWithOutputIndices + "&channel=" + channel + "&amount=" + showNumber(amountToSend, 8) + "&sendTo=" + sendTo.replace('#', '|')+"&remainingAmount="+showNumber(remainingDash, 8)+"&remainingAddress="+remainingAddress+"&instantSend="+useInstantSend+"&privateSend="+usePrivateSend+"&extraText="+getChannelExtraText()).done(
 					function (data) {
 						var txHashes = data["txHashes"];
 						rawTx = data["rawTx"];
 						txFee = data["usedSendTxFee"];
 						//console.log("txHashes: %O", txHashes);
 						//console.log("rawTx: %O", rawTx);
-						var rawTxList = showRawTxPanel(toAddress, txFee,
+						var rawTxList = showRawTxPanel(sendTo, txFee,
 							data["redirectedPrivateSendAddress"],
 							data["redirectedPrivateSendAmount"]);
 						$("<li>Using these inputs from your addresses for the required <b>" + showDashOrMDashNumber(totalAmountNeeded) + "</b> (including fees):<ol>" + inputListText + "</ol></li>").appendTo(rawTxList);
@@ -844,12 +917,13 @@ function showRawTxPanel(toAddress, txFee, privateSendAddress, redirectedPrivateS
 	rawTxList.empty();
 	var useInstantSend = $("#useInstantSend").is(':checked');
 	var usePrivateSend = $("#usePrivateSend").is(':checked');
-	if (usePrivateSend)
+	if (usePrivateSend && toAddress !== privateSendAddress)
 		$("<li>Sending <b>" + showDashOrMDashNumber(redirectedPrivateSendAmount) + "</b> (with PrivateSend tx fees) to new autogenerated PrivateSend address <a href='https://explorer.dash.org/address/" + privateSendAddress + "' target='_blank' rel='noopener noreferrer'><b>" + privateSendAddress + "</b></a>. When mixing is done (between right away and a few hours) <b>" + showDashOrMDashNumber(amountToSend) + "</b> will anonymously arrive at: <a href='https://explorer.dash.org/address/" + toAddress + "' target='_blank' rel='noopener noreferrer'><b>" + toAddress + "</b></a></li>").appendTo(rawTxList);
+	else if (toAddress !== privateSendAddress)
+		$("<li>Sending <b>" + showDashOrMDashNumber(amountToSend) + "</b> to "+getChannel()+": "+toAddress+" via <a href='https://explorer.dash.org/address/" + privateSendAddress + "' target='_blank' rel='noopener noreferrer'><b>" + privateSendAddress + "</b></a></li>").appendTo(rawTxList);
 	else
 		$("<li>Sending <b>" + showDashOrMDashNumber(amountToSend) + "</b> to <a href='https://explorer.dash.org/address/" + toAddress + "' target='_blank' rel='noopener noreferrer'><b>" + toAddress + "</b></a></li>").appendTo(rawTxList);
-	//not needed: $("<li>" + amountToSend + " DASH is currently: <b>$" + showNumber(amountToSend * usdRate, 2) + " = €" + showNumber(amountToSend * eurRate, 2) + " = £" + showNumber(amountToSend * gbpRate, 2) + "</b></li>").appendTo(rawTxList);
-	$("<li>InstantSend: <b>" + (useInstantSend ? "Yes" : "No") + "</b>, PrivateSend: <b>" + (usePrivateSend ? "Yes" : "No") + "</b>, Tx fee: <b>" + showDashOrMDashNumber(txFee) + "</b> ($" + showNumber(txFee * usdRate, 4) + ")</li>").appendTo(rawTxList);
+	$("<li>InstantSend: <b>" + (useInstantSend ? "Yes" : "No") + "</b>, PrivateSend: <b>" + (usePrivateSend ? "Yes" : "No") + "</b>, Tx fee"+(usePrivateSend?" (for initial send to mix)":"")+": <b>" + showDashOrMDashNumber(txFee) + "</b> ($" + showNumber(txFee * usdRate, 4) + ")</li>").appendTo(rawTxList);
 	return rawTxList;
 }
 
@@ -878,6 +952,7 @@ function importKeystoreWallet() {
 	$("#unlockKeystorePanel").hide();
 	$("#importKeystoreButton").hide();
 	$("#importKeystorePanel").show();
+	$("#hardwareWalletsPanel").hide();
 }
 
 function loadKeystoreFile() {
@@ -906,8 +981,8 @@ function importPrivateKey() {
 
 function importPrivateKeyToKeystore() {
 	var key = $("#privateKeyInput").val();
-	if (!key || key.length !== 64) {
-		$("#createPrivateKeyNotes").text("Invalid private key, it must be exactly 64 characters long!");
+	if (!key || key.length !== 52 && key.length !== 64) {
+		$("#createPrivateKeyNotes").text("Invalid private key, it must be exactly 52 or 64 characters long!");
 		return;
 	}
 	$("#privateKeyInputPanel").hide();
@@ -923,8 +998,11 @@ var dashKeystoreWallet;
 function createKeystoreWallet() {
 	$("#createKeystoreButton").attr("disabled", "disabled");
 	$("#createKeystoreOutput").html("<b>Successfully generated keystore wallet</b>, please secure it with a password now! Write this down somewhere, if you lose this you CANNOT access your keystore file, nobody can help you if you don't have your password and file.");
-	$("#createKeystorePasswordPanel").show();
+	$("#createLocalWalletPanel").hide();
 	$("#createKeystoreButton").hide();
+	$("#hardwareWalletsPanel").hide();
+	$("#importingPanel").hide();
+	$("#createKeystorePasswordPanel").show();
 }
 
 function passwordChanged() {
@@ -961,14 +1039,17 @@ function download(filename, text) {
 function generateKeystoreFile() {
 	// Use given private key or create new one if no private key import was done
 	var key = $("#privateKeyInput").val();
-	if (!key || key.length !== 64)
+	if (!key || key.length !== 52 && key.length !== 64)
 		key = window.generatePrivateKey();
+	else if (key.length === 52)
+		key = window.fromWifKey(key).toString();
 	$("#createKeystorePasswordPanel").hide();
 	var encryptedData = CryptoJS.AES.encrypt(key, $("#keystorePassword").val());
 	localStorage.setItem("keystore", encryptedData);
 	var currentDate = new Date();
 	download("MyDashWallet"+currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate()+".KeyStore", encryptedData);
 	$("#createLocalWalletPanel").hide();
+	$("#importKeystorePanel").hide();
 	$("#unlockKeystorePanel").show();
 }
 
@@ -984,6 +1065,7 @@ function unlockKeystore() {
 		else {
 			goToSendPanel("Successfully unlocked Keystore Wallet!");
 			$("#paperWalletPanel").show();
+			generateReceivingAddressList();
 			$.get("https://explorer.dash.org/chain/Dash/q/addressbalance/" + dashKeystoreWallet.address,
 				function (data, status) {
 					if (status === "success" && data !== "ERROR: address invalid") {
@@ -1004,6 +1086,11 @@ function deleteKeystore() {
 	localStorage.removeItem("keystore");
 	$("#createLocalWalletPanel").show();
 	$("#unlockKeystorePanel").hide();
+	$("#importingPanel").show();
+	$("#importKeystoreButton").show();
+	$("#createKeystoreButton").show();
+	$("#importKeystorePanel").show();
+	$("#hardwareWalletsPanel").show();
 }
 
 function createPaperWallet() {
@@ -1018,7 +1105,17 @@ function createPaperWallet() {
 	}
 	$("#createPaperWalletButton").text("Hide PaperWallet");
 	$("#paperWalletError").text("");
-	$("#privateKey").val(CryptoJS.AES.decrypt(dashKeystoreWallet.d, dashKeystoreWallet.s).toString(CryptoJS.enc.Utf8));
-	$("#privateKeyQr").attr("src", "//chart.googleapis.com/chart?cht=qr&chl=" + CryptoJS.AES.decrypt(dashKeystoreWallet.d, dashKeystoreWallet.s).toString(CryptoJS.enc.Utf8) + "&choe=UTF-8&chs=160x160&chld=L|0");
+	var hexa = CryptoJS.AES.decrypt(dashKeystoreWallet.d, dashKeystoreWallet.s).toString(CryptoJS.enc.Utf8);
+	$("#privateKeyHexa").val(hexa);
+	var wif = window.toWifKey(hexa);
+	$("#privateKeyWif").val(wif);
+	$("#privateKeyQr").attr("src", "//chart.googleapis.com/chart?cht=qr&chl=" + wif + "&choe=UTF-8&chs=160x160&chld=L|0");
 	$("#paperWalletDetails").show();
+}
+
+function deco(str) {
+	var input     = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+	var output    = 'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm'.split('');
+	var lookup    = input.reduce((m,k,i) => Object.assign(m, {[k]: output[i]}), {});
+	return str.split('').map(x => lookup[x] || x).join('');
 }

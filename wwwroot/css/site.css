@@ -1,32 +1,40 @@
-﻿/*Based on MyEtherWallet.com*/
+﻿@import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+/*Based on MyEtherWallet.com*/
 @font-face {
-	font-family: Lato;
-	src: url(/fonts/Lato-Light.woff) format("woff");
+	font-family: "Montserrat";
+	src: url(/fonts/montserrat-extralight-webfont.woff2) format("woff");
+	-webkit-font-smoothing: antialiased;
 	font-style: normal;
 	font-weight: 300
 }
 
 @font-face {
-	font-family: Lato;
-	src: url(/fonts/Lato-Regular.woff) format("woff");
+	font-family: "Montserrat";
+	src: url(/fonts/montserrat-light-webfont.woff2) format("woff");
+	-webkit-font-smoothing: antialiased;
 	font-style: normal;
 	font-weight: 400
 }
 
 @font-face {
-	font-family: Lato;
-	src: url(/fonts/Lato-Bold.woff) format("woff");
+	font-family: "Montserrat";
+	src: url(/fonts/montserrat-regular-webfont.woff2) format("woff");
+	-webkit-font-smoothing: antialiased;
 	font-style: normal;
 	font-weight: 700
 }
-/*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */ html {
-	font-family: sans-serif;
+/*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
+html {
+	font-family: "Montserrat",Helvetica,Arial,sans-serif;
+	-webkit-font-smoothing: antialiased;
 	-ms-text-size-adjust: 100%;
-	-webkit-text-size-adjust: 100%
+	-webkit-text-size-adjust: 100%;
 }
-
 body {
-	margin: 0
+	margin: 0;
+	background-image: url('/images/MenuBar.png');
+	background-repeat: repeat-x;
+	background-position: 0 108px;
 }
 
 article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
@@ -376,7 +384,6 @@ html {
 }
 
 body {
-	font-family: Lato,sans-serif;
 	font-size: 16px;
 	line-height: 1.4;
 	color: #333;
@@ -5151,10 +5158,14 @@ header {
 }
 
 .bg-gradient {
+	margin-top: 20px;
+	margin-bottom: 10px;
+	/*unused
 	background: #163151;
 	background: -webkit-linear-gradient(301deg,#132a45,#143a56,#21a4ce,#19b4ad);
 	background: -o-linear-gradient(301deg,#132a45,#143a56,#21a4ce,#19b4ad);
 	background: linear-gradient(149deg,#132a45,#143a56,#21a4ce,#19b4ad)
+		*/
 }
 
 .bg-gray-lighter {
@@ -5171,10 +5182,6 @@ header {
 
 .text-serif {
 	font-family: Georgia,Times New Roman,Times,serif
-}
-
-.text-sans-serif {
-	font-family: Lato,sans-serif
 }
 
 .pad-v-sm {
@@ -5260,16 +5267,16 @@ header {
 .header-branding .brand img {
 	padding: .25rem 0
 }
-
+/*messes up menu layout
 @media screen and (max-width:900px) {
 	.header-branding .brand img {
 		max-width: 10rem
 	}
-}
+}*/
 
 .header-branding .tagline {
 	font-weight: 200;
-	color: #fff;
+	color: #1d71b8;
 	-webkit-box-flex: 1;
 	-webkit-flex: 1 auto;
 	-ms-flex: 1 auto;
@@ -5292,7 +5299,15 @@ header {
 	-webkit-box-align: center;
 	-webkit-align-items: center;
 	-ms-flex-align: center;
-	align-items: center
+	align-items: center;
+	display: block;
+	margin-right: 50px;
+	padding-right: 0;
+	position: relative;
+	float: right;
+	font-weight: bold;
+	text-align: right;
+	font-size: 14px;
 }
 
 @media screen and (max-width:900px) {
@@ -9861,8 +9876,12 @@ legend {
 	.skip-when-small {
 		display: none;
 	}
+	.nav > li.skip-when-small, .nav > li.skip-when-small > a {
+		display: none;
+	}
 	.tagline {
 		font-size: 10pt;
+		margin-right: 0;
 	}
 	.visible-xs {
 		display: block !important
@@ -9894,6 +9913,15 @@ legend {
 }
 
 @media (min-width:768px) and (max-width:991px) {
+	.skip-when-medium {
+		display: none;
+	}
+	.nav > li.skip-when-medium, .nav > li.skip-when-medium > a {
+		display: none;
+	}
+	.tagline {
+		margin-right: 0;
+	}
 	.visible-sm {
 		display: block !important
 	}
@@ -9924,6 +9952,15 @@ legend {
 }
 
 @media (min-width:992px) and (max-width:1151px) {
+	.skip-when-medium {
+		display: none;
+	}
+	.nav > li.skip-when-medium, .nav > li.skip-when-medium > a {
+		display: none;
+	}
+	.tagline {
+		margin-right: 0;
+	}
 	.visible-md {
 		display: block !important
 	}
@@ -10416,15 +10453,112 @@ li.unlock-button {
 }
 footer {
 	font-size: 13px;
+	background-color: #1d71b8;
+	color: white;
+	margin: 0;
+	margin-top: 20px;
+	padding: 5px;
 }
-.extraFooter {
+footer .container {
 	margin: 0 auto;
+	padding-top: 6px;
 	font-size: 12px;
 }
-.navbar-nav>li>a {
+footer a {
+	color: #CFCFFF;
+}
+footer a:hover {
+	color: white;
+}
+.navbar-nav {
+	/*not needed: background: #1d71b8;*/
+	color: white;
+}
+.nav > li { margin-bottom: 0; }
+.navbar-nav > li > a {
 	line-height: 20px;
 	padding: 15px;
+	color: white;
+	outline: none;
 }
-.navbar-nav>li>a:hover {
-	background-color: lightgray;
+.navbar-nav > li > a:hover {
+	background-color: white;
+	color: #1d71b8;
+	outline: none;
+}
+input[type=radio] {
+	display: none;
+}
+.sendLabel {
+	display: inline-block;
+	margin: 0;
+	padding: 8px;
+	font-weight: 600;
+	text-align: center;
+	color: #bbb;
+	border: 1px solid transparent;
+}
+.sendLabel:before {
+	font-family: fontawesome;
+	font-weight: normal;
+	margin-right: 10px;
+}
+/* http://astronautweb.co/snippet/font-awesome/ */
+.sendLabel[for='sendToAddress']:before {
+	content: '\f02d';
+}
+.sendLabel[for='sendToTwitter']:before {
+	content: '\f099';
+}
+.sendLabel[for='sendToFacebook']:before {
+	content: '\f09a';
+}
+.sendLabel[for='sendToReddit']:before {
+	content: '\f1a1';
+}
+.sendLabel[for='sendToDiscord']:before {
+	content: '\f210';
+}
+.sendLabel[for='sendToTelegram']:before {
+	content: '\f1d9';
+}
+.sendLabel[for='sendToYoutube']:before {
+	content: '\f167';
+}
+.sendLabel[for='sendToTwitch']:before {
+	content: '\f1e8';
+}
+.sendLabel[for='sendToGithub']:before {
+	content: '\f09b';
+}
+.sendLabel[for='sendToEmail']:before {
+	content: '\f003';
+}
+.sendLabel:hover {
+	color: #888;
+	cursor: pointer;
+}
+input:checked + .sendLabel {
+	color: #555;
+	border: 1px solid #ddd;
+	border-top: 2px solid orange;
+	border-bottom: 1px solid #fff;
+}
+
+#contentToAddress,
+#contentToTwitter,
+#contentToReddit,
+#contentToDiscord,
+#contentToTelegram,
+#contentToEmail {
+	display: none;
+}
+
+#sendToAddress:checked ~ #contentToAddress,
+#sendToTwitter:checked ~ #contentToTwitter,
+#sendToReddit:checked ~ #contentToReddit,
+#sendToDiscord:checked ~ #contentToDiscord,
+#sendToTelegram:checked ~ #contentToTelegram,
+#sendToEmail:checked ~ #contentToEmail {
+	display: block;
 }

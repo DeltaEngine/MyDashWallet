@@ -5,25 +5,39 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Node\**" />
     <Compile Remove="Properties\PublishProfiles\**" />
     <Compile Remove="Services\**" />
     <Compile Remove="Tests\**" />
+    <Compile Remove="_NCrunch_MyDashWallet\**" />
+    <Content Remove="Node\**" />
     <Content Remove="Properties\PublishProfiles\**" />
     <Content Remove="Services\**" />
     <Content Remove="Tests\**" />
     <Content Remove="bitcore-lib-dash\node_modules\**" />
+    <Content Remove="_NCrunch_MyDashWallet\**" />
+    <EmbeddedResource Remove="Node\**" />
     <EmbeddedResource Remove="Properties\PublishProfiles\**" />
     <EmbeddedResource Remove="Services\**" />
     <EmbeddedResource Remove="Tests\**" />
+    <EmbeddedResource Remove="_NCrunch_MyDashWallet\**" />
+    <None Remove="Node\**" />
     <None Remove="Properties\PublishProfiles\**" />
     <None Remove="Services\**" />
     <None Remove="Tests\**" />
     <None Remove="bitcore-lib-dash\node_modules\**" />
+    <None Remove="_NCrunch_MyDashWallet\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".gitignore" />
+    <None Remove="MyDashWallet.v3.ncrunchsolution" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
+    <PackageReference Include="TweetinviAPI" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,7 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="Services\Full\MyDashWallet.Services.Full.csproj" />
-    <ProjectReference Include="Services\MyDashWallet.Services.csproj" />
+    <ProjectReference Include="Node\BitcoinLib\BitcoinLib.csproj" />
+    <ProjectReference Include="Node\MyDashWallet.Node.csproj" />
   </ItemGroup>
 </Project>

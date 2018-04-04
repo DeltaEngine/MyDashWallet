@@ -1,8 +1,8 @@
 ﻿@{
 	ViewData["Title"] = "Check any Dash address";
 }
-<a id="bookmark-this" title="Bookmark This Dash Address Page" style="float: right">Bookmark this Dash Address for easy checking</a>
-<h2>@ViewData["Title"]</h2>
+<h2>@ViewData["Title"]
+	<a id="bookmark-this" title="Bookmark This Dash Address Page" style="float: right; margin-top: 14px;">Bookmark this Dash Address for easy checking</a></h2>
 <h3>@ViewData["Message"]</h3>
 
 <script>
@@ -85,7 +85,7 @@
 				</a>
 			</li>
 		</ul>
-		@*TODO: add live check on the right in a little box, balance, also add button to select next from addressBalances array*@
+		@*add live check on the right in a little box, balance, also add button to select next from addressBalances array*@
 		<script>
 			var urlAddress = window.location.search;
 			if (urlAddress && urlAddress.length >= 35)

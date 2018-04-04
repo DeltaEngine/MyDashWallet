@@ -2,6 +2,12 @@ var bitcore = require('bitcore-lib-dash');
 window.generatePrivateKey = function() {
 	return new bitcore.PrivateKey().toString();
 }
+window.fromWifKey = function(key) {
+	return bitcore.PrivateKey.fromWIF(key);
+}
+window.toWifKey = function(key) {
+	return new bitcore.PrivateKey(key).toWIF();
+}
 window.getDecryptedAddress = function(key) {
 	return new bitcore.PrivateKey(key).toAddress().toString();
 }
