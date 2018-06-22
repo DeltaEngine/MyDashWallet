@@ -23,15 +23,15 @@ Roadmap for MyDashWallet
 - And of course ongoing work, integrating the new Dash logos and identity plus support for any user issues (which runs quite smooth right now).
 
 **In-Progress: June 2018: Website update, Languages, Bots with tons of new features, unconfirmed amounts support**
-- Better TREZOR Hardware Wallet Support, also for the new TREZOR Model T. Things work, but Ledger support is much better right now on MyDashWallet due to native javascript implementation, for Trezor a high level api is used and a popup is shown, there are some limitations for InstantSend and low fees, we can do better with a custom low level javascript library.
-- MyDashWallet has its own block explorer now and we can finally support unconfirmed amounts, also we don't have to wait for tx or addresses to appear anymore as our block explorer can directly show the latest state: https://mydashwallet.org:3001/insight/
 - Easier tipping without having to wait for confirmations, Trustless Tipping to directly send from hardware wallet to the recipient, merging social accounts with existing hardware or MyDashWallet keystore wallets
 - Bot Improvements for Twitter, Reddit and most importantly Discord (the bot also runs of Telegram and email, but we mostly focus on the 3 active platforms): Improvements to tipping, rain and other existing commands, adding mini games and community focused features like: Dice Betting Games, Lottery, Voting, CoinFlip, Russian Roulette, Contests
+- MyDashWallet has its own block explorer now and we can finally support unconfirmed amounts, also we don't have to wait for tx or addresses to appear anymore as our block explorer can directly show the latest state: https://mydashwallet.org:3001/insight/
 
-**In-Progress: July 2018: **
+**In-Progress: July 2018:**
 - Translations to all major languages (English, Spanish, French, German, Portuguese, Italian, maybe Chinese, Korean, Russian and others if we find good cheap translators)
 - A simple installer to get MyDashWallet hosted on your own server and/or connecting to your own Dash Full Node, this has been requested many times and some users are already running their own version of the website and changed the connection the node, but for non-technical persons it is too difficult, this simple installer will make it possible for anyone.
 - Native Android and iOS wallets utilizing MyDashWallet.org (either as a native app hosting the website or some other way, not sure yet)
+- Better TREZOR Hardware Wallet Support, also for the new TREZOR Model T. Things work, but Ledger support is much better right now on MyDashWallet due to native javascript implementation, for Trezor a high level api is used and a popup is shown, there are some limitations for InstantSend and low fees, we can do better with a custom low level javascript library.
 
 **In-Progress: August 2018 (might have to cut some features if funding runs out):**
 - Swapping Dash for other coins like BTC, BCH, ETH or LTC, we have a partner providing us with low fees (much lower than Shapeshift or Changelly) and can provide a much better and easier way to exchange any supported coin to and from Dash
