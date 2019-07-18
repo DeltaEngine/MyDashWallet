@@ -10,7 +10,6 @@
 <script src="~/dash.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/tripledes.js"></script>
-<script src="//greasyfork.org/scripts/6696-cryptojs-lib-bytearray/code/CryptoJSlibByteArray.js"></script>
 <script type="text/javascript" src="instascan.min.js"></script>
 <script src="~/index.js"></script>
 <h1 id="title">Unlock Wallet</h1>
@@ -130,10 +129,6 @@
 				var redeemParam = "Redeem";
 				var redeem = new URL(window.location.href).searchParams.get(redeemParam);
 				if (redeem && redeem.length > 70) {
-					//var keyBytes = CryptoJS.lib.ByteArray([174, 58, 44, 120, 212, 213, 239, 2]);
-					//var ivBytes = CryptoJS.lib.ByteArray([100, 234, 181, 91, 42, 217, 196, 60]);
-					//var options = { mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 };//{ iv: ivBytes }
-					//var decrypted = CryptoJS.tripledes..DES.decrypt(CryptoJS.enc.Base64.parse(redeem), "Secret Passphrase", options).toString(CryptoJS.enc.Utf8);
 					try {
 						//console.log(redeem);
 						var text = atob(redeem);
