@@ -1,8 +1,0 @@
-get npm
-add browserify: npm install -g browserify
-add uglify: npm install -g uglify-js
-
-npm install
-browserify dash.input.js | uglifyjs > ..\wwwroot\dash.js
-
-or just double click the generate-dash.js.cmd file once everything is setup.

@@ -1,9 +1,0 @@
-﻿<ProjectConfiguration>
-  <Settings>
-    <IgnoredTests>
-      <NamedTestSelector>
-        <TestName>MyDashWallet.Services.Tests.DashNodeTests.GenerateRealTransaction</TestName>
-      </NamedTestSelector>
-    </IgnoredTests>
-  </Settings>
-</ProjectConfiguration>
