@@ -369,8 +369,18 @@ export default class App extends Component {
 		return result
 	}
 	render() {
-		if (window.location.href.includes('/mixing') || window.location.href.includes('/redeem')) {
-			window.location.href = window.location.href.replace("https://mydashwallet.org", "https://old.mydashwallet.org")
+		var url = window.location.href.toLowerCase()
+		if (url.includes('/mixing') || url.includes('/redeem')) {
+			if (url.includes('https://mydashwallet.org'))
+				window.location = window.location.href.replace(
+					'https://mydashwallet.org',
+					'https://old.mydashwallet.org'
+				)
+			else if (url.includes('http://localhost:3000'))
+				window.location = window.location.href.replace(
+					'http://localhost:3000',
+					'https://old.mydashwallet.org'
+				)
 			return <div />
 		}
 		var popupDialog = {

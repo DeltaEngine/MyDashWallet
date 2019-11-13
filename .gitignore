@@ -42,3 +42,4 @@ _NCRUNCH_*
 *.user
 CustomProfile.pubxml
 *.config
+build/
