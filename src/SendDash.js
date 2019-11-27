@@ -195,7 +195,7 @@ export class SendDash extends Component {
 		var address = addressesWithUnspendInputs[addressesWithUnspendInputsIndex].address
 		//console.log('addNextAddressWithUnspendFundsToRawTx ' + address + ' index=' + addressesWithUnspendInputsIndex)
 		fetch(
-			'https://explorer.mydashwallet.org/insight-api/addr/' +
+			'https://insight.dash.org/insight-api/addr/' +
 				addressesWithUnspendInputs[addressesWithUnspendInputsIndex].address +
 				'/utxo',
 			{
