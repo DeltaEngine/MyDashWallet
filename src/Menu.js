@@ -7,12 +7,12 @@ import {
 	faWallet,
 	faRandom,
 	faGift,
-	faComments,
-	faChartBar,
+	//faComments,
+	//faChartBar,
 	faQuestion,
 	faSitemap,
 	faSignOutAlt,
-	faBookDead,
+	//faBookDead,
 } from '@fortawesome/free-solid-svg-icons'
 
 const Container = styled.div`
@@ -191,14 +191,18 @@ export class Menu extends Component {
 						<li>
 							<Link to="/" onClick={() => this.props.setMode('')}>
 								<FontAwesomeIcon icon={faWallet} />
-								<span>{!this.props.isUnlocked ? 'Unlock ' : ''}Wallet</span>
+								<span>{!this.props.isUnlocked ? 'Open ' : ''}Wallet</span>
 							</Link>
 						</li>
 						<li>
-							<Link to="/mix" onClick={() => this.props.setMode('mix')}>
+							<a href="https://old.mydashwallet.org/mixing">
 								<FontAwesomeIcon icon={faRandom} />
 								<span>Mix</span>
-							</Link>
+							</a>
+							{/*unused, and not very helpful <Link to="/mix" onClick={() => this.props.setMode('mix')}>
+								<FontAwesomeIcon icon={faRandom} />
+								<span>Mix</span>
+							</Link> */}
 						</li>
 						<li>
 							<Link to="/tip" onClick={() => this.props.setMode('tip')}>
@@ -206,28 +210,16 @@ export class Menu extends Component {
 								<span>Tip</span>
 							</Link>
 						</li>
-						<li>
+						{/* TODO: implement on top of dash platform <li>
 							<Link to="/chat" onClick={() => this.props.setMode('chat')}>
 								<FontAwesomeIcon icon={faComments} />
 								<span>Chat</span>
 							</Link>
-						</li>
-						<li>
-							<Link to="/stats" onClick={() => this.props.setMode('stats')}>
-								<FontAwesomeIcon icon={faChartBar} />
-								<span>Statistics</span>
-							</Link>
-						</li>
+						</li> */}
 						<li>
 							<Link to="/help" onClick={() => this.props.setMode('help')}>
 								<FontAwesomeIcon icon={faQuestion} />
 								<span>Help</span>
-							</Link>
-						</li>
-						<li>
-							<Link to="/scripthack" onClick={() => this.props.setMode('scripthack')}>
-								<FontAwesomeIcon icon={faBookDead} />
-								<span>Script Hack 2019-07-12</span>
 							</Link>
 						</li>
 						<li>
@@ -303,13 +295,24 @@ export class Menu extends Component {
 						</a>
 					</center>
 					<FooterText collapsed={collapsed}>
-						&copy; 2019 MyDashWallet by <a href="https://deltaengine.net/" target="_blank" rel="noopener noreferrer">DeltaEngine</a>
+						&copy; 2017-2020 MyDashWallet by{' '}
+						<a href="https://deltaengine.net/" target="_blank" rel="noopener noreferrer">
+							DeltaEngine
+						</a>
 					</FooterText>
 					<FooterText collapsed={collapsed}>
 						<a href="/help" target="_blank" rel="noopener noreferrer">
 							Terms of Use
-						</a>{' - '}
-						Funded by <a href="https://www.dashcentral.org/p/MyDashWallet" target="_blank" rel="noopener noreferrer">DASH DAO</a>
+						</a>
+						{' - '}
+						Funded by{' '}
+						<a
+							href="https://www.dashcentral.org/p/MyDashWallet"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							DASH DAO
+						</a>
 					</FooterText>
 				</MenuFooter>
 			</Container>

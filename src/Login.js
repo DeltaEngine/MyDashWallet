@@ -73,7 +73,8 @@ export class Login extends Component {
 		else this.setState({ walletMessage: this.props.onLoginWallet(this.state.password) })
 	}
 	createWalletClick = () => {
-		if (this.state.password.length < 8) this.setError('Please enter a password — min. 8 characters')
+		if (this.state.seed.length < 12 || this.state.seed.split(' ').length !== 12)
+			this.setError('Please enter a 12 word HD wallet seed')
 		else if (this.state.password !== this.state.passwordAgain)
 			this.setError('Please enter the same password twice')
 		else if (!this.state.agree) this.setError('Please agree to the terms of use')
@@ -121,13 +122,13 @@ export class Login extends Component {
 			} else this.setState({ trezorMessage: 'Error: ' + result.payload.error })
 		})
 	}
-	createWallet = () => {
+	createWallet = restore => {
 		this.setState({
 			walletMessage: this.props.isWalletAvailable
 				? 'Enter your password to unlock your wallet'
 				: "Make sure your device is safe & no one is watching, don't show this to anyone.",
 			walletMessageColor: 'black',
-			seed: this.props.isWalletAvailable ? '' : new Mnemonic().toString(),
+			seed: this.props.isWalletAvailable || restore ? '' : new Mnemonic().toString(),
 			password: '',
 			passwordAgain: '',
 		})
@@ -138,15 +139,13 @@ export class Login extends Component {
 		return (
 			<div>
 				<UnlockBlock>
-					<h1>Unlock Wallet</h1>
-					<span data-i18n="HardwareSafestOption">
-						Hardware wallets are the safest option via
-					</span>{' '}
-					<a href="https://en.wikipedia.org/wiki/Universal_2nd_Factor">
-						Chrome <span data-i18n="Or">or</span> Opera
-					</a>
-					<br />
-					<br />
+					<h1>Open Wallet</h1>
+					<div data-i18n="HardwareSafestOption" style={{ fontSize: 'small', marginBottom: '4px' }}>
+						Hardware wallets are the safest option via{' '}
+						<a href="https://en.wikipedia.org/wiki/Universal_2nd_Factor">
+							Chrome <span data-i18n="Or">or</span> Opera
+						</a>
+					</div>
 					<LoginButton
 						onClick={() => {
 							this.setState({ loginMode: 'Ledger' })
@@ -183,6 +182,9 @@ export class Login extends Component {
 						{this.state.trezorMessage}
 					</SkyLight>
 					<br />
+					<div style={{ fontSize: 'small', marginBottom: '4px' }}>
+						Create or open HD Wallets in your browser locally.
+					</div>
 					<LoginButton
 						style={{ paddingTop: '0' }}
 						onClick={() => {
@@ -194,11 +196,27 @@ export class Login extends Component {
 							<div style={{ fontSize: '55px', fontWeight: 'normal', float: 'left' }}>+</div>
 						)}
 						{this.props.isWalletAvailable ? (
-							<div style={{ marginTop: '34px' }}>Unlock HD Wallet</div>
+							<div style={{ marginTop: '34px' }}>Open HD Wallet</div>
 						) : (
-							<div style={{ marginTop: '34px' }}>New HD Wallet</div>
+							<div style={{ marginTop: '34px' }}>Create HD Wallet</div>
 						)}
 					</LoginButton>
+					<br />
+					<br />
+					<LoginButton
+						style={{ paddingTop: '0' }}
+						onClick={() => {
+							this.setState({ loginMode: 'Wallet', restore: true })
+							this.createWallet(true)
+						}}
+					>
+						<div style={{ marginTop: '34px' }}>Restore from Seed</div>
+					</LoginButton>
+					<br />
+					<span style={{ fontSize: 'small' }}>
+						Private key and File imports are available on the{' '}
+						<a href="https://old.mydashwallet.org">Old Website</a>
+					</span>
 					<SkyLight
 						dialogStyles={this.props.popupDialog}
 						hideOnOverlayClicked
@@ -206,7 +224,9 @@ export class Login extends Component {
 						title={
 							this.props.isWalletAvailable
 								? 'Enter password to unlock wallet'
-								: 'Create or Import HD Wallet'
+								: this.state.restore
+								? 'Restore HD Wallet from Seed'
+								: 'Create HD Wallet'
 						}
 					>
 						<a style={{ float: 'right' }} href="/help" target="_blank" rel="noopener noreferrer">
@@ -218,8 +238,9 @@ export class Login extends Component {
 							<div>
 								<br />
 								<br />
-								Locally generated HD Wallet Seed, <b>replace with your own if you want to import</b>
-								!
+								{this.state.restore
+									? 'Enter your 12 word HD Wallet Seed you want to import'
+									: 'Locally generated HD Wallet Seed'}
 								<br />
 								<input
 									type="text"
@@ -306,12 +327,17 @@ export class Login extends Component {
 						<button
 							onClick={() => {
 								this.showSeedDialog.hide()
-								this.setState({
-									walletMessage: this.props.onCreateWallet(
-										new Mnemonic(this.state.seed),
-										this.state.password
-									),
-								})
+								try {
+									this.setState({
+										walletMessage: this.props.onCreateWallet(
+											new Mnemonic(this.state.seed),
+											this.state.password
+										),
+									})
+								} catch (error) {
+									this.walletDialog.show()
+									this.setError('Failed to create HD Wallet from Seed: ' + error)
+								}
 							}}
 						>
 							Ok
