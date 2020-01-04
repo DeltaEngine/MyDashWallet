@@ -77,11 +77,11 @@ export class Balances extends Component {
 					<BalanceBoxValue>{this.props.showNumber(this.props.totalBalance, 8)}</BalanceBoxValue>
 				</BalanceBox>
 				<BalanceBox title="PrivateSend Balance">
-					{window.innerWidth > 768 && (
-						<button style={{ float: 'right' }} onClick={() => this.props.setMode('mix')}>
-							Mix
-						</button>
-					)}
+					{window.innerWidth > 768 //unused atm: && (
+					// <button style={{ float: 'right' }} onClick={() => this.props.setMode('mix')}>
+					// 	Mix
+					// </button>)
+					}
 					<BalanceBoxTitle>PrivateSend Balance</BalanceBoxTitle>
 					<Icon icon={faLock} />
 					<BalanceBoxValue style={{ color: '#8d00e4' }}>
