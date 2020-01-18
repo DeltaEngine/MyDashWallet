@@ -77,7 +77,7 @@ export class LoggedIn extends Component {
 		return this.props.showNumber(amount, 8) + ' DASH'
 	}
 	fillTransactionFromAddress = address => {
-		fetch('https://explorer.mydashwallet.org/insight-api/txs/?address=' + address, {
+		fetch('https://insight.dash.org/insight-api/txs/?address=' + address, {
 			mode: 'cors',
 			cache: 'no-cache',
 		})
@@ -150,7 +150,7 @@ export class LoggedIn extends Component {
 	}
 	updateAddressBalance = (addressToCheck, oldBalance) => {
 		var component = this
-		fetch('https://explorer.mydashwallet.org/insight-api/addr/' + addressToCheck, {
+		fetch('https://insight.dash.org/insight-api/addr/' + addressToCheck, {
 			mode: 'cors',
 			cache: 'no-cache',
 			signal: this.updatingBalanceController.signal,
@@ -274,7 +274,7 @@ export class LoggedIn extends Component {
 	}
 	fillTransactionFromId = (txId, txIndex) => {
 		if (txId)
-			fetch('https://explorer.mydashwallet.org/insight-api/tx/' + txId, {
+			fetch('https://insight.dash.org/insight-api/tx/' + txId, {
 				mode: 'cors',
 				cache: 'no-cache',
 			})
