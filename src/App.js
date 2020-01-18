@@ -370,7 +370,7 @@ export default class App extends Component {
 	}
 	render() {
 		var url = window.location.href.toLowerCase()
-		if (url.includes('/mixing') || url.includes('/redeem')) {
+		if (url.includes('/mixing') || url.includes('/redeem') || url.includes('/?redeem')) {
 			if (url.includes('https://mydashwallet.org'))
 				window.location = window.location.href.replace(
 					'https://mydashwallet.org',
