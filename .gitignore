@@ -43,3 +43,4 @@ _NCRUNCH_*
 CustomProfile.pubxml
 *.config
 build/
+.env
