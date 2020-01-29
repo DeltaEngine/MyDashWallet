@@ -14,6 +14,10 @@ import {
 	faSignOutAlt,
 	//faBookDead,
 } from '@fortawesome/free-solid-svg-icons'
+import Dropdown from 'react-dropdown'
+import 'react-dropdown/style.css'
+
+const explorerOptions = ['blockchair.com/dash', 'insight.dash.org', 'explorer.mydashwallet.org']
 
 const Container = styled.div`
 	transition: all linear 0.2s;
@@ -177,6 +181,7 @@ export class Menu extends Component {
 		this.props.setCollapsed(!this.state.collapsed)
 		this.setState({ collapsed: !this.state.collapsed })
 	}
+
 	render() {
 		var collapsed = this.state && this.state.collapsed
 		return (
@@ -238,6 +243,14 @@ export class Menu extends Component {
 				</MenuElements>
 				<Illustration collapsed={collapsed} />
 				<MenuFooter>
+					<span style={{ fontSize: '12px' }}>Explorer to use</span>
+					<Dropdown
+						options={explorerOptions}
+						onChange={this.props.onSelectExplorer}
+						value={explorerOptions[0]}
+						placeholder="Blockchain Explorer"
+					/>
+					<br />
 					<center>
 						<a
 							href="https://github.com/DeltaEngine/MyDashWallet"

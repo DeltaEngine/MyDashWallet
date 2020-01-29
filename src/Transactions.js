@@ -56,7 +56,15 @@ export class Transactions extends Component {
 										<div className="tx_link">
 											<a
 												className="short-link"
-												href={'https://explorer.mydashwallet.org/tx/' + tx.id}
+												href={
+													'https://' +
+													this.props.explorer +
+													(this.props.explorer === 'insight.dash.org' ? '/insight' : '') +
+													(this.props.explorer === 'blockchair.com/dash'
+														? '/transaction/'
+														: '/tx/') +
+													tx.id
+												}
 												target="_blank"
 												rel="noopener noreferrer"
 											>

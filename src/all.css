@@ -194,6 +194,7 @@ button:active {
 	padding-right: 10px;
 }
 #transactions .colConfirmations {
+	display: none; /*not really needed, everything is always confirmed*/
 	width: 17%;
 	padding-right: 0;
 }
@@ -252,4 +253,14 @@ label {
 	button {
 		padding: 0px 18px;
 	}
+}
+.Dropdown-control {
+	width: 82%;
+}
+.Dropdown-placeholder {
+	height: 14px;
+	font-size: 12px;
+}
+.Dropdown-menu {
+	font-size: 12px;
 }

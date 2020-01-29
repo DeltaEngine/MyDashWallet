@@ -194,10 +194,18 @@ export class SendDash extends Component {
 		var component = this
 		var address = addressesWithUnspendInputs[addressesWithUnspendInputsIndex].address
 		//console.log('addNextAddressWithUnspendFundsToRawTx ' + address + ' index=' + addressesWithUnspendInputsIndex)
+		var isBlockchair = this.props.explorer === 'blockchair.com/dash'
 		fetch(
-			'https://insight.dash.org/insight-api/addr/' +
-				addressesWithUnspendInputs[addressesWithUnspendInputsIndex].address +
-				'/utxo',
+			isBlockchair
+				? 'https://api.blockchair.com/dash/dashboards/address/' +
+						addressesWithUnspendInputs[addressesWithUnspendInputsIndex].address +
+						'?key=' +
+						process.env.REACT_APP_BLOCKCHAIR_API_KEY
+				: 'https://' +
+						this.props.explorer +
+						'/insight-api/addr/' +
+						addressesWithUnspendInputs[addressesWithUnspendInputsIndex].address +
+						'/utxo',
 			{
 				mode: 'cors',
 				cache: 'no-cache',
@@ -205,14 +213,18 @@ export class SendDash extends Component {
 		)
 			.then(component.handleErrors)
 			.then(utxos => {
+				if (isBlockchair)
+					utxos =
+						utxos['data'][addressesWithUnspendInputs[addressesWithUnspendInputsIndex].address][
+							'utxo'
+						]
 				var thisAddressAmountToUse = 0
 				var totalAmountNeeded = component.getTotalAmountNeededByRecalculatingTxFee(txToUse)
 				for (var i = 0; i < utxos.length; i++) {
-					var amount = utxos[i]['amount']
+					var amount = isBlockchair ? utxos[i]['value'] * send.DASH_PER_DUFF : utxos[i]['amount']
 					if (amount >= send.DUST_AMOUNT_INPUTS_IN_DASH) {
-						//console.log('Adding ' + amount + ' via utxo ' + utxos[i]['txid'] + '|' + utxos[i]['vout'])
-						txToUse.push(utxos[i]['txid'])
-						txOutputIndexToUse.push(utxos[i]['vout'])
+						txToUse.push(utxos[i][isBlockchair ? 'transaction_hash' : 'txid'])
+						txOutputIndexToUse.push(utxos[i][isBlockchair ? 'index' : 'vout'])
 						txAddressPathIndices.push(
 							addressesWithUnspendInputs[addressesWithUnspendInputsIndex].addressIndex
 						)
@@ -223,7 +235,10 @@ export class SendDash extends Component {
 					}
 				}
 				inputListText +=
-					'https://explorer.mydashwallet.org/address/' +
+					'https://' +
+					this.props.explorer +
+					(this.props.explorer === 'insight.dash.org' ? '/insight' : '') +
+					'/address/' +
 					address +
 					' (-' +
 					component.props.showDashNumber(thisAddressAmountToUse) +
@@ -275,7 +290,10 @@ export class SendDash extends Component {
 								console.log(
 									'The remaining ' +
 										component.props.showDashNumber(remainingDash) +
-										' will be send to your own receiving address: https://explorer.mydashwallet.org/address/' +
+										' will be send to your own receiving address: https://' +
+										this.props.explorer +
+										(this.props.explorer === 'insight.dash.org' ? '/insight' : '') +
+										'/address/' +
 										remainingAddress
 								)
 							if (component.props.trezor)
@@ -746,7 +764,13 @@ export class SendDash extends Component {
 					Your transaction was successfully sent.
 					<br />
 					<a
-						href={'https://explorer.mydashwallet.org/tx/' + this.state.sendTransaction}
+						href={
+							'https://' +
+							this.props.explorer +
+							(this.props.explorer === 'insight.dash.org' ? '/insight' : '') +
+							(this.props.explorer === 'blockchair.com/dash' ? '/transaction/' : '/tx/') +
+							this.state.sendTransaction
+						}
 						target="_blank"
 						rel="noopener noreferrer"
 					>

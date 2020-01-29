@@ -20,6 +20,7 @@
 		"password-hash": "^1.2.2",
 		"react": "^16.8.6",
 		"react-dom": "^16.8.6",
+		"react-dropdown": "^1.6.4",
 		"react-ga": "^2.5.7",
 		"react-notifications": "^1.4.3",
 		"react-qr-reader": "^2.2.1",

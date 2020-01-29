@@ -32,7 +32,7 @@ export class LoggedIn extends Component {
 		var component = this
 		this.skipInitialTxInterval = setTimeout(() => {
 			component.setState({ skipInitialTransactionsNotifications: false })
-		}, 3873)
+		}, 11873)
 		this.skipEmptyAddressesInterval = setTimeout(() => {
 			// Only check empty old addresses after 1 minute, then they are not longer checked
 			component.setState({ skipEmptyAddresses: false })
@@ -77,27 +77,38 @@ export class LoggedIn extends Component {
 		return this.props.showNumber(amount, 8) + ' DASH'
 	}
 	fillTransactionFromAddress = address => {
-		fetch('https://insight.dash.org/insight-api/txs/?address=' + address, {
-			mode: 'cors',
-			cache: 'no-cache',
-		})
+		var isBlockchair = this.props.explorer === 'blockchair.com/dash'
+		fetch(
+			isBlockchair
+				? 'https://api.blockchair.com/dash/dashboards/address/' +
+						address +
+						'?transaction_details=true&key=' +
+						process.env.REACT_APP_BLOCKCHAIR_API_KEY
+				: 'https://' + this.props.explorer + '/insight-api/txs/?address=' + address,
+			{
+				mode: 'cors',
+				cache: 'no-cache',
+			}
+		)
 			.then(response => response.json())
 			.then(data => {
-				const txs = data.txs
+				const txs = isBlockchair ? data['data'][address]['transactions'] : data.txs
 				for (var index = 0; index < txs.length; index++) {
 					const tx = txs[index]
-					var time = new Date(tx['time'] * 1000)
-					var amountChange = 0
-					const vin = tx['vin']
-					for (var i = 0; i < vin.length; i++)
-						if (this.isOwnAddress(vin[i]['addr'], address))
-							amountChange -= parseFloat(vin[i]['value'])
-					const vout = tx['vout']
-					for (var j = 0; j < vout.length; j++)
-						if (this.isOwnAddress(vout[j]['scriptPubKey']['addresses'][0], address))
-							amountChange += parseFloat(vout[j]['value'])
+					var time = isBlockchair ? new Date(tx['time']) : new Date(tx['time'] * 1000)
+					var amountChange = isBlockchair ? tx['balance_change'] * send.DASH_PER_DUFF : 0
+					if (!isBlockchair) {
+						const vin = tx['vin']
+						for (var i = 0; i < vin.length; i++)
+							if (this.isOwnAddress(vin[i]['addr'], address))
+								amountChange -= parseFloat(vin[i]['value'])
+						const vout = tx['vout']
+						for (var j = 0; j < vout.length; j++)
+							if (this.isOwnAddress(vout[j]['scriptPubKey']['addresses'][0], address))
+								amountChange += parseFloat(vout[j]['value'])
+					}
 					this.addTransaction({
-						id: tx.txid,
+						id: isBlockchair ? tx.hash : tx.txid,
 						amountChange: amountChange,
 						time: time,
 						confirmations: tx.confirmations,
@@ -150,15 +161,27 @@ export class LoggedIn extends Component {
 	}
 	updateAddressBalance = (addressToCheck, oldBalance) => {
 		var component = this
-		fetch('https://insight.dash.org/insight-api/addr/' + addressToCheck, {
-			mode: 'cors',
-			cache: 'no-cache',
-			signal: this.updatingBalanceController.signal,
-		})
+		var isBlockchair = this.props.explorer === 'blockchair.com/dash'
+		fetch(
+			isBlockchair
+				? 'https://api.blockchair.com/dash/dashboards/address/' +
+						addressToCheck +
+						'?key=' +
+						process.env.REACT_APP_BLOCKCHAIR_API_KEY
+				: 'https://' + this.props.explorer + '/insight-api/addr/' + addressToCheck,
+			{
+				mode: 'cors',
+				cache: 'no-cache',
+				signal: this.updatingBalanceController.signal,
+			}
+		)
 			.then(response => response.json())
 			.then(data => {
+				if (isBlockchair) data = data['data'][addressToCheck]['address']
 				if (data && !isNaN(data.balance)) {
-					var newBalance = parseFloat(data.balance)
+					var newBalance = isBlockchair
+						? data.balance * send.DASH_PER_DUFF
+						: parseFloat(data.balance)
 					if (!isNaN(data.unconfirmedBalance)) newBalance += parseFloat(data.unconfirmedBalance)
 					var rememberToUpdateTotalAmount =
 						newBalance < 1000 && component.props.addressBalances[addressToCheck] !== newBalance
@@ -175,7 +198,7 @@ export class LoggedIn extends Component {
 					//var lastUsedAddress = this.state.addresses.length > 1 ? this.state.addresses[this.state.addresses.length - 2] : lastUnusedAddress
 					if (
 						addressToCheck === lastUnusedAddress &&
-						(newBalance > 0 || parseFloat(data.totalReceived) > 0)
+						(newBalance > 0 || parseFloat(data.totalReceived) > 0 || data.received > 0)
 					) {
 						if (this.props.trezor) {
 							//not needed in wallet mode, horrible user experience having to confirm each address, we have all addresses already for trezor!
@@ -270,28 +293,48 @@ export class LoggedIn extends Component {
 			}
 		}
 		var component = this
-		this.updateBalanceInterval = setInterval(() => component.balanceCheck(), 3000)
+		this.updateBalanceInterval = setInterval(() => component.balanceCheck(), 10000)
 	}
 	fillTransactionFromId = (txId, txIndex) => {
-		if (txId)
-			fetch('https://insight.dash.org/insight-api/tx/' + txId, {
+		if (!txId) return
+		var isBlockchair = this.props.explorer === 'blockchair.com/dash'
+		fetch(
+			isBlockchair
+				? 'https://api.blockchair.com/dash/dashboards/transaction/' +
+						txId +
+						'?key=' +
+						process.env.REACT_APP_BLOCKCHAIR_API_KEY
+				: 'https://' + this.props.explorer + '/insight-api/tx/' + txId,
+			{
 				mode: 'cors',
 				cache: 'no-cache',
-			})
-				.then(response => response.json())
-				.then(tx => {
-					var time = new Date(tx['time'] * 1000)
-					var amountChange = parseFloat(tx.vout[txIndex]['value'])
+			}
+		)
+			.then(response => response.json())
+			.then(tx => {
+				if (isBlockchair) {
+					tx = tx['data'][txId]
 					this.addTransaction({
 						id: txId,
-						amountChange: amountChange,
-						time: time,
+						amountChange: tx['inputs'][txIndex]['value'] * send.DASH_PER_DUFF,
+						time: new Date(tx['transaction']['time']),
+						confirmations: tx['transaction']['block_id'] - 1205434,
+						size: tx['transaction'].size,
+						fees: tx['transaction'].fees * send.DASH_PER_DUFF,
+						txlock: tx['transaction'].is_instant_lock,
+					})
+				} else {
+					this.addTransaction({
+						id: txId,
+						amountChange: parseFloat(tx.vout[txIndex]['value']),
+						time: new Date(tx['time'] * 1000),
 						confirmations: tx.confirmations,
 						size: tx.size,
 						fees: tx.fees,
 						txlock: tx.txlock,
 					})
-				})
+				}
+			})
 	}
 	getUnusedAddress = () => {
 		var lastAddress = this.state.addresses[this.state.addresses.length - 1]
@@ -367,6 +410,7 @@ export class LoggedIn extends Component {
 					setSelectedCurrency={value => this.setState({ selectedCurrency: value })}
 				/>
 				<SendDash
+					explorer={this.props.explorer}
 					popupDialog={this.props.popupDialog}
 					addressBalances={this.props.addressBalances}
 					hdSeedE={this.props.hdSeedE}
@@ -445,6 +489,7 @@ export class LoggedIn extends Component {
 					<button onClick={() => this.hdWalletTooMuchBalanceWarning.hide()}>Ok</button>
 				</SkyLight>
 				<ReceiveDash
+					explorer={this.props.explorer}
 					lastUnusedAddress={this.state.lastUnusedAddress}
 					addressBalances={this.props.addressBalances}
 					reversedAddresses={this.state.addresses.slice().reverse()}
@@ -452,6 +497,7 @@ export class LoggedIn extends Component {
 				/>
 				<div style={{ clear: 'both', paddingTop: '20px' }}>
 					<Transactions
+						explorer={this.props.explorer}
 						transactions={this.state.transactions}
 						getSelectedCurrencyDashPrice={this.getSelectedCurrencyDashPrice}
 						selectedCurrency={this.state.selectedCurrency}

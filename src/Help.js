@@ -226,8 +226,9 @@ export class Help extends Component {
 								</li>
 								<li data-i18n="[html]AboutBlockchain5">
 									When you see your balance on MyDashWallet.org or view your transactions on{' '}
-									<a href="https://explorer.mydashwallet.org">https://explorer.mydashwallet.org</a>,
-									you are seeing data on the blockchain, not in our personal systems.
+									<a href="https://explorer.mydashwallet.org">https://explorer.mydashwallet.org</a>{' '}
+									or one of the other supported explorers, you are seeing data on the blockchain,
+									not in our personal systems.
 								</li>
 								<li data-i18n="AboutBlockchain6">Again: we are not a bank </li>
 							</ul>

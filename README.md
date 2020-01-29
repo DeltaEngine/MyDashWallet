@@ -8,7 +8,7 @@ This project is open-source, free to use and development was funded by the DASH 
 
 # Runs locally
 
-You can simply download the website https://MyDashWallet.org and run it locally, the whole wallet functionality (including hardware wallets, creating hd wallets, unlocking, etc.) all runs offline and in your browser. However when you want to see the current dash amount or send out dash you need to be online as the website communicates with https://insight.dash.org for the dash amount in your addresses and to send it will utilize an open empty dash node for broadcasting locally signed transactions into the Dash network.
+You can simply download the website https://MyDashWallet.org and run it locally, the whole wallet functionality (including hardware wallets, creating hd wallets, unlocking, etc.) all runs offline and in your browser. However when you want to see the current dash amount or send out dash you need to be online as the website communicates with one of the supported explorers (https://blockchair.com, https://insight.dash.org or https://explorer.mydashwallet.org) for the dash amount in your addresses and to send it will utilize an open empty dash node for broadcasting locally signed transactions into the Dash network.
 
 # Installation
 

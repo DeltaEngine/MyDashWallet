@@ -128,6 +128,7 @@ export default class App extends Component {
 				loading: false,
 				mode: this.getModeFromUrl(),
 				collapsed: window.innerWidth < 768,
+				explorer: 'blockchair.com/dash',
 			}
 		else
 			this.state = {
@@ -140,6 +141,7 @@ export default class App extends Component {
 				hdSeedE: hdSeedE, //allow login again from stored encrypted seed, password is unknown and must match hash
 				mode: this.getModeFromUrl(),
 				collapsed: window.innerWidth < 768,
+				explorer: 'blockchair.com/dash',
 			}
 		window.onpopstate = () => {
 			if (this.state.mode !== this.getModeFromUrl()) this.setMode(this.getModeFromUrl())
@@ -368,6 +370,10 @@ export default class App extends Component {
 		if (result === '' || isNaN(result)) return 0
 		return result
 	}
+	selectExplorer = change => {
+		console.log('Selected explorer: ' + change.value)
+		this.setState({ explorer: change.value })
+	}
 	render() {
 		var url = window.location.href.toLowerCase()
 		if (url.includes('/mixing') || url.includes('/redeem') || url.includes('/?redeem')) {
@@ -403,6 +409,7 @@ export default class App extends Component {
 			<PageContainer>
 				<Menu
 					onLogout={this.logout}
+					onSelectExplorer={this.selectExplorer}
 					mode={this.state.mode}
 					setMode={this.setMode}
 					hardwareWallet={this.state.ledger || this.state.trezor}
@@ -441,6 +448,7 @@ export default class App extends Component {
 						<ScriptHack />
 					) : this.state.hdSeedE && this.state.encryptedPasswordHash ? (
 						<LoggedIn
+							explorer={this.state.explorer}
 							popupDialog={popupDialog}
 							addressBalances={addressBalances}
 							unlockedText={

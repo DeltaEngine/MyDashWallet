@@ -142,7 +142,11 @@ export class Login extends Component {
 					<h1>Open Wallet</h1>
 					<div data-i18n="HardwareSafestOption" style={{ fontSize: 'small', marginBottom: '4px' }}>
 						Hardware wallets are the safest option via{' '}
-						<a href="https://en.wikipedia.org/wiki/Universal_2nd_Factor">
+						<a
+							href="https://en.wikipedia.org/wiki/Universal_2nd_Factor"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
 							Chrome <span data-i18n="Or">or</span> Opera
 						</a>
 					</div>
@@ -181,6 +185,21 @@ export class Login extends Component {
 						<br />
 						{this.state.trezorMessage}
 					</SkyLight>
+					<br />
+					<div style={{ fontSize: 'small', marginBottom: '10px' }}>
+						API supported by blockchair, insight.dash.org and our fallback explorer. Check
+						transactions and addresses fully private at
+					</div>
+					<a href="https://blockchair.com/dash" target="_blank" rel="noopener noreferrer">
+						<img
+							style={{ marginLeft: '20px' }}
+							width="160"
+							src="https://blockchair.com/images/new/logo.svg"
+							alt="Explorer support via Blockchair"
+							title="Explorer and API support via Blockchair"
+						/>
+					</a>
+					<br />
 					<br />
 					<div style={{ fontSize: 'small', marginBottom: '4px' }}>
 						Create or open HD Wallets in your browser locally.
@@ -296,16 +315,20 @@ export class Login extends Component {
 						)}
 						{this.props.isWalletAvailable ? (
 							<div>
-								<button onClick={() => this.loginWalletClick()}>Unlock Wallet</button>
 								<button
-									style={{ float: 'right' }}
+									style={{ backgroundColor: 'gray', fontSize: '12px' }}
 									onClick={() => this.deleteAreYouSureDialog.show()}
 								>
 									Delete Wallet
 								</button>
+								<button style={{ float: 'right' }} onClick={() => this.loginWalletClick()}>
+									Unlock Wallet
+								</button>
 							</div>
 						) : (
-							<button onClick={() => this.createWalletClick()}>Create Wallet</button>
+							<button style={{ float: 'right' }} onClick={() => this.createWalletClick()}>
+								Create Wallet
+							</button>
 						)}
 					</SkyLight>
 					<SkyLight
@@ -372,6 +395,12 @@ export class Login extends Component {
 					<br />
 					<br />
 					<br />
+					<h3>About</h3>
+					<ul>
+						<li>Free & open-source</li>
+						<li>Client-side (runs in your browser)</li>
+						<li>YOU are your own bank</li>
+					</ul>
 					<br />
 					<h3>Help</h3>
 					<ul>

@@ -18,10 +18,25 @@ const Panel = styled.div`
 
 export class ReceiveDash extends Component {
 	render = () => {
+		var addressLink =
+			'https://' +
+			this.props.explorer +
+			(this.props.explorer === 'insight.dash.org' ? '/insight' : '') +
+			'/address/' +
+			this.props.lastUnusedAddress
 		return (
 			<Panel>
 				<h3>Your receive address</h3>
-				<b>{this.props.lastUnusedAddress}</b>
+				<b>{this.props.lastUnusedAddress}</b>&nbsp;
+				<a
+					href={addressLink}
+					alt="Explorer"
+					title="Explorer"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					^
+				</a>
 				<br />
 				<img
 					src={
@@ -30,6 +45,7 @@ export class ReceiveDash extends Component {
 						'&choe=UTF-8&chs=200x200&chld=L|0'
 					}
 					alt="QR Code"
+					title="QR Code"
 				/>
 				{this.props.reversedAddresses.length > 1 && (
 					<div>
@@ -37,7 +53,13 @@ export class ReceiveDash extends Component {
 						{this.props.reversedAddresses.slice(1).map(a => (
 							<div key={a} style={{ fontSize: '12px' }}>
 								<a
-									href={'https://explorer.mydashwallet.org/address/' + a}
+									href={
+										'https://' +
+										this.props.explorer +
+										(this.props.explorer === 'insight.dash.org' ? '/insight' : '') +
+										'/address/' +
+										a
+									}
 									target="_blank"
 									rel="noopener noreferrer"
 								>
