@@ -128,7 +128,7 @@ export default class App extends Component {
 				loading: false,
 				mode: this.getModeFromUrl(),
 				collapsed: window.innerWidth < 768,
-				explorer: 'blockchair.com/dash',
+				explorer: 'insight.dash.org',
 			}
 		else
 			this.state = {
@@ -141,7 +141,7 @@ export default class App extends Component {
 				hdSeedE: hdSeedE, //allow login again from stored encrypted seed, password is unknown and must match hash
 				mode: this.getModeFromUrl(),
 				collapsed: window.innerWidth < 768,
-				explorer: 'blockchair.com/dash',
+				explorer: 'insight.dash.org',
 			}
 		window.onpopstate = () => {
 			if (this.state.mode !== this.getModeFromUrl()) this.setMode(this.getModeFromUrl())
