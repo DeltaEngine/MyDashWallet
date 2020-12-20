@@ -82,12 +82,29 @@ export class Tip extends Component {
 					</li>
 					<li data-i18n="[html]TippingOther">
 						<b>Telegram</b>: On telegram you can add the bot via <b>@MyDashWalletBot</b> or talk to{' '}
-						<a href="http://t.me/MyDashWalletBot">http://t.me/MyDashWalletBot</a>
+						<a href="https://t.me/MyDashWalletBot">https://t.me/MyDashWalletBot</a>
 						<br />
 						Commands start with a / on Telegram, so you can type /price, /tip, /withdrawal, /deposit
 						and most other commands. Keep in mind due to Telegrams restrictions the bot has no
 						rights to contact users, thus all commands are visible in the chat and users also must
 						have a username set to communicate with the bot.
+						<br />
+						<br />
+						Useful Telegram Dash communities:
+						<ul>
+							<li><a href="https://t.me/dash_chat">https://t.me/dash_chat</a> International</li>
+							<li><a href="https://t.me/dashbrasil">https://t.me/dashbrasil</a> Dash Brasil</li>
+							<li><a href="https://t.me/DashDinheiroDigital">https://t.me/DashDinheiroDigital</a> Dash Dinheiro Digital</li>
+							<li><a href="https://t.me/dashpayES">https://t.me/dashpayES</a> Español</li>
+							<li><a href="https://t.me/dashembassydach">https://t.me/dashembassydach</a> Germany, Austria, Switzerland</li>
+							<li><a href="https://t.me/dash_chat_italia">https://t.me/dash_chat_italia</a> Dash Chat Italia - Ufficiale</li>
+							<li><a href="https://t.me/dashindonesia">https://t.me/dashindonesia</a> Indonesia</li>
+							<li><a href="https://t.me/Dash_Iran_official">https://t.me/Dash_Iran_official</a> Iran</li>
+							<li><a href="https://t.me/Dash_Ru">https://t.me/Dash_Ru</a> Russia</li>
+							<li><a href="https://t.me/dashthailand">https://t.me/dashthailand</a> Thailand</li>
+							<li><a href="https://t.me/dashturkey">https://t.me/dashturkey</a> Turkey</li>
+							<li>QQ 达世币官方群 DASH.China: <b>419967021</b></li>
+						</ul>
 						<br />
 						<br />
 						<b>Other</b>: We don't have bots running on other social platforms yet, but you can
