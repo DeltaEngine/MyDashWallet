@@ -6,6 +6,7 @@ import { NotificationManager } from 'react-notifications'
 import TrezorConnect from 'trezor-connect'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faQrcode } from '@fortawesome/free-solid-svg-icons'
+import { Resolution } from '@unstoppabledomains/resolution'
 import SkyLight from 'react-skylight'
 import * as send from './send.js'
 
@@ -28,12 +29,14 @@ const Panel = styled.div`
 		font-size: 12px;
 	}
 `
+const resolution = new Resolution()
 
 export class SendDash extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
 			destinationAddress: '',
+			resolvedDestAddr: '',
 			amountToSend: 0,
 			amountUsd: 0,
 			error: '',
@@ -44,21 +47,19 @@ export class SendDash extends Component {
 		this.updateTxFee(1)
 		this.setState({
 			destinationAddress: '',
+			resolvedDestAddr: '',
 			amountToSend: 0,
 			error: '',
 		})
 	}
 	sendDash = () => {
+		const isInvalidAddress = !this.isValidAddress(this.state.destinationAddress)
 		if (
 			this.state.amountToSend < send.DUST_AMOUNT_IN_DASH ||
 			this.state.amountToSend > this.props.totalBalance ||
-			!this.props.isValidDashAddress(this.state.destinationAddress)
+			isInvalidAddress
 		) {
-			NotificationManager.error(
-				!this.props.isValidDashAddress(this.state.destinationAddress)
-					? 'Invalid address'
-					: 'Invalid amount'
-			)
+			NotificationManager.error(isInvalidAddress ? 'Invalid address' : 'Invalid amount')
 			this.setState({
 				error:
 					'Please use an amount you have and a valid address to send to. Unable to create transaction.',
@@ -253,7 +254,7 @@ export class SendDash extends Component {
 						//debug: inputListText += "<li>"+txToUse[index]+", "+txOutputIndexToUse[index]+"</li>";
 						utxosTextWithOutputIndices += txToUse[index] + '|' + txOutputIndexToUse[index] + '|'
 					}
-					var sendTo = component.state.destinationAddress
+					var sendTo = component.state.resolvedDestAddr
 					//var usePrivateSend = false //TODO: $("#usePrivateSend").is(':checked');
 					// Update amountToSend in case we had to reduce it a bit to allow for the txFee
 					var amountToSend = totalAmountNeeded - txFee
@@ -507,7 +508,7 @@ export class SendDash extends Component {
 					'Sent ' +
 						component.props.showDashNumber(component.state.amountToSend) +
 						' to ' +
-						component.state.destinationAddress,
+						component.state.resolvedDestAddr,
 					'Success'
 				)
 				var newBalance = component.props.totalBalance - (component.state.amountToSend + txFee)
@@ -613,20 +614,20 @@ export class SendDash extends Component {
 		TrezorConnect.composeTransaction({
 			outputs: [
 				{
-					address: this.state.destinationAddress,
+					address: this.state.resolvedDestAddr,
 					amount: '' + Math.round(sendAmount / send.DASH_PER_DUFF), //in duff
 				},
 			],
 			coin: 'dash',
 			push: true,
-		}).then(function(result) {
+		}).then(function (result) {
 			if (result.success) {
 				//not needed, we pushed already via trezor: component.sendSignedTx(result.payload.serializedTx)
 				NotificationManager.success(
 					'Sent ' +
 						component.props.showDashNumber(sendAmount) +
 						' to ' +
-						component.state.destinationAddress,
+						component.state.resolvedDestAddr,
 					'Success'
 				)
 				var newBalance = component.props.totalBalance - (sendAmount + txFee)
@@ -673,6 +674,33 @@ export class SendDash extends Component {
 			[],
 			''
 		)
+	}
+	isValidAddress = address => {
+		return resolution.isRegistered(address)
+			.then(isRegistered => {
+				if (isRegistered) {
+					resolution.addr(address, 'DASH')
+						.then((resolvedAddr) => {
+							this.setState({ resolvedDestAddr: resolvedAddr })
+							return this.props.isValidDashAddress(resolvedAddr)
+						})
+						.catch((e) => {
+							NotificationManager.error('Fail to resolve address')
+							this.setState({ error: 'Fail to resolve address: ' + e, resolvedDestAddr: '' })
+							return false
+						})
+				}
+				else {
+					this.setState({ resolvedDestAddr: address })
+					return this.props.isValidDashAddress(address)
+				}
+			})
+			.catch(e =>{
+				this.setState({ resolvedDestAddr: '' })
+				NotificationManager.error('Fail to check if address is valid')
+				this.setState({ error: 'Fail to check if address is valid: ' + e })
+				return false
+			})
 	}
 	render = () => {
 		return (
@@ -927,7 +955,7 @@ export class SendDash extends Component {
 									<button
 										style={{ float: 'right' }}
 										onClick={() => {
-											if (!this.props.isValidDashAddress(this.state.destinationAddress)) {
+											if (!this.isValidAddress(this.state.destinationAddress)) {
 												this.setState({ error: 'Please enter a valid DASH Destination Address' })
 											} else if (this.state.amountToSend < send.DUST_AMOUNT_IN_DASH) {
 												this.setState({
