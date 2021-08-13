@@ -53,36 +53,43 @@ export class SendDash extends Component {
 		})
 	}
 	sendDash = () => {
-		this.isValidAddress(this.state.destinationAddress).then((isValidAddress) => {
-			if (
-				this.state.amountToSend < send.DUST_AMOUNT_IN_DASH ||
-				this.state.amountToSend > this.props.totalBalance ||
-				!isValidAddress
-			) {
-				NotificationManager.error(!isValidAddress ? 'Invalid address' : 'Invalid amount')
+		this.isValidAddress(this.state.destinationAddress)
+			.then((isValidAddress) => {
+				if (
+					this.state.amountToSend < send.DUST_AMOUNT_IN_DASH ||
+					this.state.amountToSend > this.props.totalBalance ||
+					!isValidAddress
+				) {
+					NotificationManager.error(!isValidAddress ? 'Invalid address' : 'Invalid amount')
+					this.setState({
+						error:
+							'Please use an amount you have and a valid address to send to. Unable to create transaction.',
+					})
+				} else if (!this.props.isCorrectPasswordHash(this.state.password)) {
+					this.setState({
+						error: 'Please enter your correct password to unlock your wallet for sending DASH.',
+					})
+				} else {
+					this.props.setRememberedPassword(this.state.password)
+					this.addNextAddressWithUnspendFundsToRawTx(
+						this.getAddressesWithUnspendFunds(),
+						0,
+						this.props.getUnusedAddress(),
+						0,
+						[],
+						[],
+						[],
+						''
+					)
+					this.confirmSendDialog.hide()
+				}
+			})
+			.catch((err) => {
 				this.setState({
-					error:
-						'Please use an amount you have and a valid address to send to. Unable to create transaction.',
+					error: 'Error while preparing to send dash, please try again.',
 				})
-			} else if (!this.props.isCorrectPasswordHash(this.state.password)) {
-				this.setState({
-					error: 'Please enter your correct password to unlock your wallet for sending DASH.',
-				})
-			} else {
-				this.props.setRememberedPassword(this.state.password)
-				this.addNextAddressWithUnspendFundsToRawTx(
-					this.getAddressesWithUnspendFunds(),
-					0,
-					this.props.getUnusedAddress(),
-					0,
-					[],
-					[],
-					[],
-					''
-				)
-				this.confirmSendDialog.hide()
-			}
-		})
+				console.error(`Exception: ${err}`)
+			})
 	}
 	getAddressesWithUnspendFunds = () => {
 		var addresses = []
@@ -676,32 +683,23 @@ export class SendDash extends Component {
 			''
 		)
 	}
-	isValidAddress = address => {
-		return resolution.isRegistered(address)
-			.then(isRegistered => {
-				if (isRegistered) {
-					resolution.addr(address, 'DASH')
-						.then((resolvedAddr) => {
-							this.setState({ resolvedDestAddr: resolvedAddr })
-							return this.props.isValidDashAddress(resolvedAddr)
-						})
-						.catch((e) => {
-							NotificationManager.error('Fail to resolve address')
-							this.setState({ error: 'Fail to resolve address: ' + e, resolvedDestAddr: '' })
-							return false
-						})
-				}
-				else {
-					this.setState({ resolvedDestAddr: address })
-					return this.props.isValidDashAddress(address)
-				}
-			})
-			.catch(e =>{
-				this.setState({ resolvedDestAddr: '' })
-				NotificationManager.error('Fail to check if address is valid')
-				this.setState({ error: 'Fail to check if address is valid: ' + e })
-				return false
-			})
+	isValidAddress = async(address) => {
+		try {
+			const isRegistered = await resolution.isRegistered(address)
+			if (isRegistered) {
+				const resolvedAddr = await resolution.addr(address, 'DASH')
+				this.setState({ resolvedDestAddr: resolvedAddr })
+				return this.props.isValidDashAddress(resolvedAddr)
+			} else {
+				this.setState({ resolvedDestAddr: address })
+				return this.props.isValidDashAddress(address)
+			}
+		} catch (e) {
+			this.setState({ resolvedDestAddr: '' })
+			NotificationManager.error('Fail to check if address is valid')
+			this.setState({ error: `Fail to check if address ${address} is valid: ${e}` })
+			return false
+		}
 	}
 	render = () => {
 		return (
@@ -956,35 +954,46 @@ export class SendDash extends Component {
 									<button
 										style={{ float: 'right' }}
 										onClick={() => {
-											this.isValidAddress(this.state.destinationAddress).then((isValidAddress) => {
-												if (!isValidAddress) {
-													this.setState({ error: 'Please enter a valid DASH Destination Address' })
-												} else if (this.state.amountToSend < send.DUST_AMOUNT_IN_DASH) {
+											this.isValidAddress(this.state.destinationAddress)
+												.then((isValidAddress) => {
+													if (!isValidAddress) {
+														this.setState({
+															error: 'Please enter a valid DASH Destination Address',
+														})
+													} else if (this.state.amountToSend < send.DUST_AMOUNT_IN_DASH) {
+														this.setState({
+															error:
+																'Make sure to enter a valid amount. Minimum ' +
+																send.DUST_AMOUNT_IN_DASH +
+																' DASH',
+														})
+													} else if (this.state.amountToSend > this.props.totalBalance) {
+														var balanceError =
+															'Not enough balance. You got ' +
+															this.props.showDashNumber(this.props.totalBalance) +
+															', the amount to sent was corrected, please check and press Next again.'
+														this.setState({
+															amountToSend: this.props.totalBalance,
+															amountUsd:
+																this.props.totalBalance * this.props.getSelectedCurrencyDashPrice(),
+															error: balanceError,
+														})
+													} else {
+														this.setState({ error: '' })
+														this.updateTxFee(
+															this.getNumberOfInputsRequired(this.state.amountToSend)
+														)
+														if (this.props.trezor) this.generateTrezorSignedTx()
+														else if (this.props.ledger) this.generateLedgerSignedTx()
+														this.confirmSendDialog.show()
+													}
+												})
+												.catch((err) => {
 													this.setState({
-														error:
-															'Make sure to enter a valid amount. Minimum ' +
-															send.DUST_AMOUNT_IN_DASH +
-															' DASH',
+														error: 'Error while preparing to send dash, please try again.',
 													})
-												} else if (this.state.amountToSend > this.props.totalBalance) {
-													var balanceError =
-														'You got ' +
-														this.props.showDashNumber(this.props.totalBalance) +
-														', the amount to sent was corrected, please check and press Next again.'
-													this.setState({
-														amountToSend: this.props.totalBalance,
-														amountUsd:
-															this.props.totalBalance * this.props.getSelectedCurrencyDashPrice(),
-														error: balanceError,
-													})
-												} else {
-													this.setState({ error: '' })
-													this.updateTxFee(this.getNumberOfInputsRequired(this.state.amountToSend))
-													if (this.props.trezor) this.generateTrezorSignedTx()
-													else if (this.props.ledger) this.generateLedgerSignedTx()
-													this.confirmSendDialog.show()
-												}
-											})
+													console.error(`Exception: ${err}`)
+												})
 										}}
 									>
 										Next
